@@ -13,6 +13,8 @@
 #' @param z0 optional initialization vector
 #' @param x0 optional initialization vector
 #' @return list
+#' @importFrom Rcpp sourceCpp
+#' @useDynLib sglssnal
 #' @export
 sglssnal <- function(
     Ainput, b, lambda, G, ind, options,

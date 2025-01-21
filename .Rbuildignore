@@ -1,6 +1,8 @@
 ^\.git$
 ^\.gitignore$
+^\.vscode$
 ^scratch$
 ^LICENSE\.md$
 ^README\.md$
 ^src$
+^compile_flags.txt$

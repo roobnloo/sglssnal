@@ -1,0 +1,14 @@
+#ifndef NORM_OPS_H
+#define NORM_OPS_H
+#include "group_struct.h"
+#include <RcppArmadillo.h>
+
+using namespace arma;
+
+arma::vec proximal_l1(const arma::vec &w, double lam);
+arma::vec proximal_l2(const arma::vec &z, double lam, const GroupStruct &gs);
+// arma::vec proximal_combo(const arma::vec &w, double lam);
+arma::vec projection_l2(const arma::vec &z, double lam, const GroupStruct &gs,
+                        arma::vec &grp_norms);
+
+#endif

@@ -2,3 +2,5 @@
 *.so
 *.dll
 scratch/
+.vscode/
+compile_flags.txt
