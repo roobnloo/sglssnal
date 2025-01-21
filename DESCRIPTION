@@ -1,0 +1,15 @@
+Package: sglssnal
+Title: Sparse-Group Lasso via Semismooth Newton Augmented Lagrangian
+Version: 0.0.0.9000
+Authors@R:
+    person("Robin", "Liu", , "r_liu@ucsb.edu", role = c("aut", "cre"))
+Description: An R package implementing the sparse-group lasso method of
+    Zhang et al. 2020 <doi:10.1007/s10107-018-1329-6>. Unlike many widely available
+    methods based on first-order descent, this method uses second-order information
+    and solves the dual optimization problem using semismooth Newtonian optimization.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    Matrix, RSpectra

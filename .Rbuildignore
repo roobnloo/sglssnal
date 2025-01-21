@@ -1,0 +1,6 @@
+^\.git$
+^\.gitignore$
+^scratch$
+^LICENSE\.md$
+^README\.md$
+^src$
