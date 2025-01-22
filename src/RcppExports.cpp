@@ -11,50 +11,30 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// mat2_ssn_interface
-Rcpp::List mat2_ssn_interface(const arma::vec& u, const arma::sp_mat& A, double lam1, double lam2, double sig, const arma::sp_mat& pma, const arma::uvec g, const arma::mat& ind, uint num_group);
-RcppExport SEXP _sglssnal_mat2_ssn_interface(SEXP uSEXP, SEXP ASEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP sigSEXP, SEXP pmaSEXP, SEXP gSEXP, SEXP indSEXP, SEXP num_groupSEXP) {
+// conjgrad_linsolver_impl
+List conjgrad_linsolver_impl(const arma::sp_mat& A, const arma::vec& rhs, const arma::vec& u, double lam1, double lam2, const arma::sp_mat& pma, const arma::uvec g, const arma::mat& ind, uint num_group, int density, double sig);
+RcppExport SEXP _sglssnal_conjgrad_linsolver_impl(SEXP ASEXP, SEXP rhsSEXP, SEXP uSEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP pmaSEXP, SEXP gSEXP, SEXP indSEXP, SEXP num_groupSEXP, SEXP densitySEXP, SEXP sigSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type u(uSEXP);
     Rcpp::traits::input_parameter< const arma::sp_mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type rhs(rhsSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type u(uSEXP);
     Rcpp::traits::input_parameter< double >::type lam1(lam1SEXP);
     Rcpp::traits::input_parameter< double >::type lam2(lam2SEXP);
-    Rcpp::traits::input_parameter< double >::type sig(sigSEXP);
     Rcpp::traits::input_parameter< const arma::sp_mat& >::type pma(pmaSEXP);
     Rcpp::traits::input_parameter< const arma::uvec >::type g(gSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type ind(indSEXP);
     Rcpp::traits::input_parameter< uint >::type num_group(num_groupSEXP);
-    rcpp_result_gen = Rcpp::wrap(mat2_ssn_interface(u, A, lam1, lam2, sig, pma, g, ind, num_group));
+    Rcpp::traits::input_parameter< int >::type density(densitySEXP);
+    Rcpp::traits::input_parameter< double >::type sig(sigSEXP);
+    rcpp_result_gen = Rcpp::wrap(conjgrad_linsolver_impl(A, rhs, u, lam1, lam2, pma, g, ind, num_group, density, sig));
     return rcpp_result_gen;
-END_RCPP
-}
-// mat_ssn_interface
-void mat_ssn_interface(const arma::vec& u, const arma::sp_mat& A, double lam1, double lam2, double sig, const arma::sp_mat& pma, const arma::uvec g, const arma::mat& ind, uint num_group, arma::mat& V, arma::vec& proj2pv, arma::vec& prox_vec);
-RcppExport SEXP _sglssnal_mat_ssn_interface(SEXP uSEXP, SEXP ASEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP sigSEXP, SEXP pmaSEXP, SEXP gSEXP, SEXP indSEXP, SEXP num_groupSEXP, SEXP VSEXP, SEXP proj2pvSEXP, SEXP prox_vecSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type u(uSEXP);
-    Rcpp::traits::input_parameter< const arma::sp_mat& >::type A(ASEXP);
-    Rcpp::traits::input_parameter< double >::type lam1(lam1SEXP);
-    Rcpp::traits::input_parameter< double >::type lam2(lam2SEXP);
-    Rcpp::traits::input_parameter< double >::type sig(sigSEXP);
-    Rcpp::traits::input_parameter< const arma::sp_mat& >::type pma(pmaSEXP);
-    Rcpp::traits::input_parameter< const arma::uvec >::type g(gSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type ind(indSEXP);
-    Rcpp::traits::input_parameter< uint >::type num_group(num_groupSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type V(VSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type proj2pv(proj2pvSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type prox_vec(prox_vecSEXP);
-    mat_ssn_interface(u, A, lam1, lam2, sig, pma, g, ind, num_group, V, proj2pv, prox_vec);
-    return R_NilValue;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_sglssnal_mat2_ssn_interface", (DL_FUNC) &_sglssnal_mat2_ssn_interface, 9},
-    {"_sglssnal_mat_ssn_interface", (DL_FUNC) &_sglssnal_mat_ssn_interface, 12},
+    {"_sglssnal_conjgrad_linsolver_impl", (DL_FUNC) &_sglssnal_conjgrad_linsolver_impl, 11},
     {NULL, NULL, 0}
 };
 
