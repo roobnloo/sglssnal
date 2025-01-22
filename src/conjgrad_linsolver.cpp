@@ -1,3 +1,4 @@
+#include "conjgrad_linsolver.h"
 #include "group_struct.h"
 #include "norm_ops.h"
 #include <RcppArmadillo.h>
@@ -98,13 +99,9 @@ bool mat2_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,
   return true;
 }
 
-// [[Rcpp::export]]
 List conjgrad_linsolver_impl(const arma::sp_mat &A, const arma::vec &rhs,
                              const arma::vec &u, double lam1, double lam2,
-                             const arma::sp_mat &pma, const arma::uvec &g,
-                             const arma::mat &ind, uint num_group, int density,
-                             double sig) {
-  GroupStruct gs = {pma, g, ind, num_group};
+                             const GroupStruct &gs, int density, double sig) {
   int n = rhs.n_elem;
   int solver = 1; // 1: direct, 2: direct woodbury-formula, 3: pcg
   int dn = 10000;

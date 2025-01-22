@@ -49,13 +49,17 @@ sglssnal_main <- function(A, b, lambda, P, parmain, y, z, x) {
   prim_win <- 0
   dual_win <- 0
 
-  ssncgop <- list(tol = stoptol, precond = 0)
+  ssncgop <- list(tol = stoptol, precond = 0, printsub = TRUE)
 
   sigmamax <- 1e6
   sigmamin <- 1e-4
 
   runhist <- list()
 
+  PP <- P
+  PP$G <- P$G - 1L
+  PP$ind[1, ] <- P$ind[1, ] - 1L
+  PP$ind[2, ] <- P$ind[2, ] - 1L
   for (iter in 1:maxit) {
     parNCG$sigma <- sig
 
@@ -68,7 +72,11 @@ sglssnal_main <- function(A, b, lambda, P, parmain, y, z, x) {
     }
     ssncgop$maxitersub <- maxitersub
 
-    result <- sglssn_conjgrad(y, Aty, x, Ax, A, b, lambda, P, parNCG, ssncgop)
+    result <- sglssn_conjgrad_interface(
+      y, as.numeric(Aty), x, as.numeric(Ax), A, as.numeric(b), lambda[1], lambda[2],
+      PP$matrix, PP$G, PP$ind, PP$num_group, parNCG,
+      ssncgop$printsub, ssncgop$maxitersub, ssncgop$tol
+    )
     y <- result$y
     z <- result$z
     Aty <- result$Aty
