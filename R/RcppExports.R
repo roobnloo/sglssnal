@@ -5,3 +5,7 @@ conjgrad_linsolver_impl <- function(A, rhs, u, lam1, lam2, pma, g, ind, num_grou
     .Call('_sglssnal_conjgrad_linsolver_impl', PACKAGE = 'sglssnal', A, rhs, u, lam1, lam2, pma, g, ind, num_group, density, sig)
 }
 
+findstep_interface <- function(b, sig, psi_y0, u0, Prox_u0, sigProx_u0, z0, y0, Aty0, dy, Atdy, lambda, pma, g, ind, num_group, tol, stepop) {
+    .Call('_sglssnal_findstep_interface', PACKAGE = 'sglssnal', b, sig, psi_y0, u0, Prox_u0, sigProx_u0, z0, y0, Aty0, dy, Atdy, lambda, pma, g, ind, num_group, tol, stepop)
+}
+

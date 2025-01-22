@@ -100,7 +100,7 @@ sglssnal <- function(
   primfeas <- normRp / normb
   maxfeas <- max(primfeas, dualfeas)
 
-  eta <- Matrix::norm(x - proximal_combo(x + z, lambda, P), "2") / (1 + Matrix::norm(x, "2"))
+  eta <- sqrt(sum((x - proximal_combo(x + z, lambda, P))^2)) / (1 + sqrt(sum(x^2)))
 
   lasso <- lambda[2] * P$Lasso_fz(Px) + lambda[1] * sum(abs(x))
   dualobj <- -sum(y^2) / 2 - sum(b * y)

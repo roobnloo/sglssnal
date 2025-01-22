@@ -101,7 +101,7 @@ bool mat2_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,
 // [[Rcpp::export]]
 List conjgrad_linsolver_impl(const arma::sp_mat &A, const arma::vec &rhs,
                              const arma::vec &u, double lam1, double lam2,
-                             const arma::sp_mat &pma, const arma::uvec g,
+                             const arma::sp_mat &pma, const arma::uvec &g,
                              const arma::mat &ind, uint num_group, int density,
                              double sig) {
   GroupStruct gs = {pma, g, ind, num_group};

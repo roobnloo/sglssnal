@@ -63,3 +63,13 @@ arma::vec projection_l2(const arma::vec &z, double lam, const GroupStruct &gs,
 
   return Pz;
 }
+
+arma::vec proximal_combo(const arma::vec &v, double lam1, double lam2,
+                         const GroupStruct &gs) {
+  vec utmp = proximal_l1(v, lam1);
+  vec u = gs.pma * utmp;
+  vec grp_norms(gs.num_group);
+  u = projection_l2(u, lam2, gs, grp_norms);
+  u = utmp - gs.pma.t() * u;
+  return u;
+}

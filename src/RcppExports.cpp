@@ -12,7 +12,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // conjgrad_linsolver_impl
-List conjgrad_linsolver_impl(const arma::sp_mat& A, const arma::vec& rhs, const arma::vec& u, double lam1, double lam2, const arma::sp_mat& pma, const arma::uvec g, const arma::mat& ind, uint num_group, int density, double sig);
+List conjgrad_linsolver_impl(const arma::sp_mat& A, const arma::vec& rhs, const arma::vec& u, double lam1, double lam2, const arma::sp_mat& pma, const arma::uvec& g, const arma::mat& ind, uint num_group, int density, double sig);
 RcppExport SEXP _sglssnal_conjgrad_linsolver_impl(SEXP ASEXP, SEXP rhsSEXP, SEXP uSEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP pmaSEXP, SEXP gSEXP, SEXP indSEXP, SEXP num_groupSEXP, SEXP densitySEXP, SEXP sigSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -23,7 +23,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type lam1(lam1SEXP);
     Rcpp::traits::input_parameter< double >::type lam2(lam2SEXP);
     Rcpp::traits::input_parameter< const arma::sp_mat& >::type pma(pmaSEXP);
-    Rcpp::traits::input_parameter< const arma::uvec >::type g(gSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type g(gSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type ind(indSEXP);
     Rcpp::traits::input_parameter< uint >::type num_group(num_groupSEXP);
     Rcpp::traits::input_parameter< int >::type density(densitySEXP);
@@ -32,9 +32,38 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// findstep_interface
+List findstep_interface(const arma::vec& b, double sig, double psi_y0, const arma::vec& u0, const arma::vec& Prox_u0, const arma::vec& sigProx_u0, const arma::vec& z0, const arma::vec& y0, const arma::vec& Aty0, const arma::vec& dy, const arma::vec& Atdy, const arma::vec& lambda, const arma::sp_mat& pma, const arma::uvec& g, const arma::mat& ind, uint num_group, double tol, int stepop);
+RcppExport SEXP _sglssnal_findstep_interface(SEXP bSEXP, SEXP sigSEXP, SEXP psi_y0SEXP, SEXP u0SEXP, SEXP Prox_u0SEXP, SEXP sigProx_u0SEXP, SEXP z0SEXP, SEXP y0SEXP, SEXP Aty0SEXP, SEXP dySEXP, SEXP AtdySEXP, SEXP lambdaSEXP, SEXP pmaSEXP, SEXP gSEXP, SEXP indSEXP, SEXP num_groupSEXP, SEXP tolSEXP, SEXP stepopSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< double >::type sig(sigSEXP);
+    Rcpp::traits::input_parameter< double >::type psi_y0(psi_y0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type u0(u0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Prox_u0(Prox_u0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type sigProx_u0(sigProx_u0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type z0(z0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y0(y0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Aty0(Aty0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type dy(dySEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Atdy(AtdySEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type pma(pmaSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type g(gSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type ind(indSEXP);
+    Rcpp::traits::input_parameter< uint >::type num_group(num_groupSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type stepop(stepopSEXP);
+    rcpp_result_gen = Rcpp::wrap(findstep_interface(b, sig, psi_y0, u0, Prox_u0, sigProx_u0, z0, y0, Aty0, dy, Atdy, lambda, pma, g, ind, num_group, tol, stepop));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_sglssnal_conjgrad_linsolver_impl", (DL_FUNC) &_sglssnal_conjgrad_linsolver_impl, 11},
+    {"_sglssnal_findstep_interface", (DL_FUNC) &_sglssnal_findstep_interface, 18},
     {NULL, NULL, 0}
 };
 

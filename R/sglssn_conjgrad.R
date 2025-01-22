@@ -28,6 +28,10 @@ sglssn_conjgrad <- function(y0, Aty0, x0, Ax0, A, b, lambda, P, par, options) {
     psi_y = numeric(maxitersub)
   )
 
+  PP <- P
+  PP$G <- P$G - 1L
+  PP$ind[1, ] <- P$ind[1, ] - 1L
+  PP$ind[2, ] <- P$ind[2, ] - 1L
   for (itersub in 1:maxitersub) {
     x <- sigProx_u
     Ax <- A %*% x
@@ -126,7 +130,11 @@ sglssn_conjgrad <- function(y0, Aty0, x0, Ax0, A, b, lambda, P, par, options) {
     step_opt <- list(stepop = ifelse((itersub <= 3 && dualinf_sub > 1e-4) || (itersub < 3), 1, 2))
     steptol <- 1e-5
 
-    step_result <- findstep(b, sig, psi_y, u, Prox_u, sigProx_u, z, y, Aty, dy, Atdy, lambda, P, steptol, step_opt)
+    step_result <- findstep_interface(
+      as.numeric(b), sig, psi_y, as.numeric(u), as.numeric(Prox_u), as.numeric(sigProx_u),
+      as.numeric(z), y, as.numeric(Aty), as.numeric(dy), as.numeric(Atdy), lambda,
+      PP$matrix, PP$G, PP$ind, PP$num_group, steptol, step_opt$stepop
+    )
     psi_y <- step_result$psi_y
     u <- step_result$u
     Prox_u <- step_result$Prox_u
@@ -225,94 +233,4 @@ sglssn_conjgrad <- function(y0, Aty0, x0, Ax0, A, b, lambda, P, par, options) {
   )
 
   return(list(y = y, z = z, Aty = Aty, Prox_u = Prox_u, x = x, Ax = Ax, par = par, runhist = runhist, info = info))
-}
-
-
-findstep <- function(b, sig, psi_y0, u0, Prox_u0, sigProx_u0, z0, y0, Aty0, dy, Atdy, c, P, tol, options) {
-  op <- options$stepop
-  printlevel <- 1
-  maxit <- ceiling(log(1 / (tol + .Machine$double.eps)) / log(2))
-  c1 <- 1e-4
-  c2 <- 0.9
-
-  tmp1 <- crossprod(dy, y0 + b)
-  tmp2 <- sum(dy^2)
-
-  cross <- crossprod(Atdy, Prox_u0)
-  g0 <- as.numeric(sig * cross - tmp1)
-  if (g0 <= 0) {
-    alp <- 0
-    iter <- 0
-    if (printlevel) {
-      message(sprintf("\n Need an ascent direction, %2.1e  ", g0), appendLF = FALSE)
-    }
-    u <- u0
-    y <- y0
-    z <- z0
-    Aty <- Aty0
-    Prox_u <- Prox_u0
-    sigProx_u <- sigProx_u0
-    psi_y <- psi_y0
-    return(list(psi_y = psi_y, u = u, Prox_u = Prox_u, sigProx_u = sigProx_u, z = z, y = y, Aty = Aty, alp = alp, iter = iter))
-  }
-
-  alp <- 1
-  alpconst <- 0.5
-  for (iter in 1:maxit) {
-    if (iter == 1) {
-      alp <- 1
-      LB <- 0
-      UB <- 1
-    } else {
-      alp <- alpconst * (LB + UB)
-    }
-    y <- y0 + alp * dy
-    u <- u0 - alp * Atdy
-    Prox_u <- proximal_combo(u, c, P)
-    z <- u - Prox_u
-    galp <- tmp1 + alp * tmp2
-    sigProx_u <- sig * Prox_u
-    galp <- as.numeric(crossprod(Atdy, sigProx_u) - galp)
-    psi_y <- as.numeric(-(crossprod(b, y) + 0.5 * sum(y^2) + 0.5 * sig * sum(Prox_u^2)))
-
-    if (printlevel > 1) {
-      message(sprintf("\n --------------------------------------- "))
-      message(sprintf(" alp = %2.2f, psi_y = %11.10e, psi_y0 = %11.10e", alp, psi_y, psi_y0))
-      message(sprintf(" --------------------------------------- "))
-    }
-
-    if (iter == 1) {
-      gLB <- g0
-      gUB <- galp
-      # message(sprintf("\n gLB: %.3f gUB: %.3f\n", gLB, gUB))
-      if (sign(gLB) * sign(gUB) > 0) {
-        if (printlevel) message("|", appendLF = FALSE)
-        Aty <- Aty0 + alp * Atdy
-        return(list(psi_y = psi_y, u = u, Prox_u = Prox_u, sigProx_u = sigProx_u, z = z, y = y, Aty = Aty, alp = alp, iter = iter))
-      }
-    }
-
-    if (abs(galp) < c2 * abs(g0) && (psi_y - psi_y0 - c1 * alp * g0 > 1e-8 / max(1, abs(psi_y0)))) {
-      if (op == 1 || (op == 2 && abs(galp) < tol)) {
-        if (printlevel) message(":", appendLF = FALSE)
-        Aty <- Aty0 + alp * Atdy
-        return(list(psi_y = psi_y, u = u, Prox_u = Prox_u, sigProx_u = sigProx_u, z = z, y = y, Aty = Aty, alp = alp, iter = iter))
-      }
-    }
-
-    if (sign(galp) * sign(gUB) < 0) {
-      LB <- alp
-      gLB <- galp
-    } else if (sign(galp) * sign(gLB) < 0) {
-      UB <- alp
-      gUB <- galp
-    }
-  }
-
-  if (iter == maxit) {
-    Aty <- Aty0 + alp * Atdy
-  }
-  if (printlevel) message("m", appendLF = FALSE)
-
-  return(list(psi_y = psi_y, u = u, Prox_u = Prox_u, sigProx_u = sigProx_u, z = z, y = y, Aty = Aty, alp = alp, iter = iter))
 }
