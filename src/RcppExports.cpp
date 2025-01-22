@@ -11,6 +11,25 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// mat2_ssn_interface
+Rcpp::List mat2_ssn_interface(const arma::vec& u, const arma::sp_mat& A, double lam1, double lam2, double sig, const arma::sp_mat& pma, const arma::uvec g, const arma::mat& ind, uint num_group);
+RcppExport SEXP _sglssnal_mat2_ssn_interface(SEXP uSEXP, SEXP ASEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP sigSEXP, SEXP pmaSEXP, SEXP gSEXP, SEXP indSEXP, SEXP num_groupSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type u(uSEXP);
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< double >::type lam1(lam1SEXP);
+    Rcpp::traits::input_parameter< double >::type lam2(lam2SEXP);
+    Rcpp::traits::input_parameter< double >::type sig(sigSEXP);
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type pma(pmaSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec >::type g(gSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type ind(indSEXP);
+    Rcpp::traits::input_parameter< uint >::type num_group(num_groupSEXP);
+    rcpp_result_gen = Rcpp::wrap(mat2_ssn_interface(u, A, lam1, lam2, sig, pma, g, ind, num_group));
+    return rcpp_result_gen;
+END_RCPP
+}
 // mat_ssn_interface
 void mat_ssn_interface(const arma::vec& u, const arma::sp_mat& A, double lam1, double lam2, double sig, const arma::sp_mat& pma, const arma::uvec g, const arma::mat& ind, uint num_group, arma::mat& V, arma::vec& proj2pv, arma::vec& prox_vec);
 RcppExport SEXP _sglssnal_mat_ssn_interface(SEXP uSEXP, SEXP ASEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP sigSEXP, SEXP pmaSEXP, SEXP gSEXP, SEXP indSEXP, SEXP num_groupSEXP, SEXP VSEXP, SEXP proj2pvSEXP, SEXP prox_vecSEXP) {
@@ -34,6 +53,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_sglssnal_mat2_ssn_interface", (DL_FUNC) &_sglssnal_mat2_ssn_interface, 9},
     {"_sglssnal_mat_ssn_interface", (DL_FUNC) &_sglssnal_mat_ssn_interface, 12},
     {NULL, NULL, 0}
 };
