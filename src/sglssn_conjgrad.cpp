@@ -123,6 +123,7 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
   double tiny = 1e-10;
   int maxitpsqmr = 500;
   int precond = 0;
+  double const3 = 0.7;
 
   double sig = as<double>(par["sigma"]);
   double tolconst = as<double>(par["tolconst"]);
@@ -132,7 +133,8 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
   arma::vec Aty = Aty0;
   arma::vec u = x0 / sig - Aty;
   arma::vec Prox_u = proximal_combo(u, lam1, lam2, gs);
-  arma::vec sigProx_u = sig * Prox_u;
+  arma::vec x = sig * Prox_u;
+  arma::vec Ax;
   arma::vec z = u - Prox_u;
   double psi_y =
       -(dot(b, y) + 0.5 * sum(square(y)) + 0.5 * sig * sum(square(Prox_u)));
@@ -144,8 +146,7 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
   double av_findstep;
 
   for (int itersub = 1; itersub <= maxitersub; ++itersub) {
-    arma::vec x = sigProx_u;
-    arma::vec Ax = A * x;
+    Ax = A * x;
     arma::vec Grad = -y - b + Ax;
     double normGrad = norm(Grad, 2) / normb;
     double priminf_sub = normGrad;
@@ -231,12 +232,12 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
     double steptol = 1e-5;
 
     List step_result =
-        findstep_impl(b, sig, psi_y, u, Prox_u, sigProx_u, z, y, Aty, dy, Atdy,
-                      lam1, lam2, gs, steptol, stepop, printsub);
+        findstep_impl(b, sig, psi_y, u, Prox_u, x, z, y, Aty, dy, Atdy, lam1,
+                      lam2, gs, steptol, stepop, printsub);
     psi_y = as<double>(step_result["psi_y"]);
     u = as<arma::vec>(step_result["u"]);
     Prox_u = as<arma::vec>(step_result["Prox_u"]);
-    sigProx_u = as<arma::vec>(step_result["sigProx_u"]);
+    x = as<arma::vec>(step_result["sigProx_u"]);
     z = as<arma::vec>(step_result["z"]);
     y = as<arma::vec>(step_result["y"]);
     Aty = as<arma::vec>(step_result["Aty"]);
@@ -277,8 +278,6 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
         Rcpp::Rcout << "#";
         breakyes = 1;
       }
-
-      double const3 = 0.7;
 
       double priminf_1half =
           min(priminf_vec[seq(0, ceil(itersub * const3) - 1)]);
@@ -347,8 +346,8 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
       }
 
       if (breakyes > 0) {
-        arma::vec x = sig * Prox_u;
-        arma::vec Ax = A * x;
+        x = sig * Prox_u;
+        Ax = A * x;
         break;
       }
     }
@@ -367,9 +366,8 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
       Named("psqmr") = psqmr_vec, Named("solve_ok") = solve_ok_vec,
       Named("av_findstep") = av_findstep);
 
-  vec Ax = A * (sig * Prox_u);
   return List::create(Named("y") = y, Named("z") = z, Named("Aty") = Aty,
-                      Named("Prox_u") = Prox_u, Named("x") = sig * Prox_u,
+                      Named("Prox_u") = Prox_u, Named("x") = x,
                       Named("Ax") = Ax, Named("par") = par,
                       Named("runhist") = runhist, Named("info") = info);
 }

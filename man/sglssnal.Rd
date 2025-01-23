@@ -11,7 +11,7 @@ sglssnal(
   lambda2,
   G,
   ind,
-  options,
+  options = list(),
   y0 = NULL,
   z0 = NULL,
   x0 = NULL
