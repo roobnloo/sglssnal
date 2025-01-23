@@ -11,8 +11,9 @@ using namespace arma;
 using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
 TimePoint time_now() { return std::chrono::system_clock::now(); }
 double time_diff(TimePoint end, TimePoint start) {
-  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-  return duration.count();
+  auto duration =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  return duration.count() / 1000.0;
 }
 
 int sigma_fun(int iter) {
@@ -72,14 +73,15 @@ List sglssnal_main(const arma::sp_mat &A, const arma::vec &b, double lam1,
     Rcout << "\n n=" << p << ", m=" << n << ", tol=" << stoptol
           << ", parameters:c1=" << lam1 << ", c2=" << lam2 << "\n";
     Rcout << " ---------------------------------------------------\n";
-    Rcout << " iter|  [pinfeas  dinfeas]    relgap |    pobj          dobj     "
-             "  | time | sigma |\n";
+    Rcout << " iter|  [pinfeas   dinfeas]    relgap |    pobj      dobj    "
+          << " | time(s)  |   sigma  |\n";
     Rcout << "*****************************************************************"
              "***********************************\n";
-    Rcout << std::scientific << std::setprecision(2) << std::setw(3) << 0
-          << "| [" << primfeas << " " << dualfeas << "]  " << relgap << " | "
-          << obj[0] << " " << obj[1] << " | " << time_diff(time_now(), tstart)
-          << " | " << sig << " |\n";
+    Rcout << std::scientific << std::setprecision(2) << std::setw(3) << "    "
+          << 0 << "|  [" << primfeas << " " << dualfeas << "]  " << relgap
+          << " | " << std::setprecision(4) << obj[0] << " " << obj[1] << " | "
+          << std::setprecision(2) << std::setw(3)
+          << time_diff(time_now(), tstart) << " | " << sig << " |";
   }
 
   List par_ncg;
@@ -179,9 +181,12 @@ List sglssnal_main(const arma::sp_mat &A, const arma::vec &b, double lam1,
 
     if (printyes) {
       Rcout << "\n"
-            << iter << "| [" << primfeas << " " << dualfeas << "]  " << relgap
-            << " | " << primobj << " " << dualobj << " | " << ttime << " | "
-            << sig << " |\n";
+            << std::right << std::setw(5) << iter << std::left
+            << std::scientific << std::setprecision(2) << std::setw(3) << "|  ["
+            << primfeas << " " << dualfeas << "]  " << relgap << " | "
+            << std::setprecision(4) << primobj << " " << dualobj << " | "
+            << std::setprecision(2) << std::setw(3) << ttime << " | " << sig
+            << " |";
     }
 
     if (stop || (iter == maxit)) {

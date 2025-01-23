@@ -113,7 +113,7 @@ sglssnal <- function(
     message("\n****************************************")
     message(sprintf(" SSNAL       : %s", msg))
     message(sprintf(" iteration   : %d", iter))
-    message(sprintf(" time        : %3.2f", info_main$ttime))
+    message(sprintf(" time(s)     : %3.2f", info_main$ttime))
     message(sprintf(" prim_obj    : %4.8e", primobj))
     message(sprintf(" dual_obj    : %4.8e", dualobj))
     message(sprintf(" relgap      : %4.5e", info_main$relgap))
