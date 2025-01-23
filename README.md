@@ -5,14 +5,19 @@
 This R package solves the sparse-group lasso problem using second-order information via the Semismooth Newton Augmented Lagrangian method from [Zhang et al. (2020)](https://link.springer.com/article/10.1007/s10107-018-1329-6).
 
 For a vector $x$ split up into $g$ (possibly overlapping) groups and nonnegative weights $\{w_i\}$, define the penalty function 
-$$\Phi(x) = \lambda_1\lVert x \rVert_1 + \lambda_2\sum_{i=1}^g w_i \lVert x_{(i)} \rVert_2.$$
+
+```math
+\Phi(x) = \lambda_1\lVert x \rVert_1 + \lambda_2\sum_{i=1}^g w_i \lVert x_{(i)} \rVert_2.
+```
 The sparse-group problem has the form
-$$\operatorname*{min}_x\; \frac{1}{2} \lVert Ax - b\rVert_2^2 + \Phi(x) \tag{P}$$
+```math
+\text{min}_x\ \frac{1}{2} \lVert Ax - b\rVert_2^2 + \Phi(x) \qquad \text{(P)}
+```
 while the dual problem is given by
-$$
-\max_{y,z}\; -\langle b, y \rangle - \frac{1}{2}\lVert y\rVert_2^2 - \Phi^\ast(z)\\
-\mathrm{s.t.}\; A^\top y + z = 0, \tag{D}
-$$
+```math
+\begin{matrix}\max_{y,z}\; -\langle b, y \rangle - \frac{1}{2}\lVert y\rVert_2^2 - \Phi^\ast(z) \\ \mathrm{s.t.}\; A^\top y + z = 0 \qquad \text{(D)} \end{matrix}
+```
+
 where $\Phi^\ast$ denotes the convex conjugate.
 Unlike first-order descent based methods which focus on $\mathrm{P}$, the SSNAL method uses second-order techniques to solve $\mathrm{D}$.
 
