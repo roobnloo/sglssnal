@@ -89,6 +89,6 @@ int cardcal(const arma::vec &x, double r) {
 
   vec absx_sorted = sort(abs(x), "descend");
   vec cumsum_absx = cumsum(absx_sorted);
-  uword k = index_min(cumsum_absx >= r * normx1);
+  uword k = as_scalar(arma::find(cumsum_absx >= r * normx1, 1));
   return k + 1;
 }
