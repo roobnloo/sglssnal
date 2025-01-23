@@ -236,6 +236,8 @@ List sglssnal_main(const arma::sp_mat &A, const arma::vec &b, double lam1,
       }
     }
   }
+  double eta =
+      norm(x - proximal_combo(x + z, lam1, lam2, gs), 2) / (1 + norm(x, 2));
   runhist["primfeas"] = primfeas_vec;
   runhist["dualfeas"] = dualfeas_vec;
   runhist["sigma"] = sigma_vec;
@@ -261,6 +263,7 @@ List sglssnal_main(const arma::sp_mat &A, const arma::vec &b, double lam1,
   info["termination"] = runhist["termination"];
   info["relgap"] = relgap;
   info["msg"] = runhist["termination"];
+  info["eta"] = eta;
 
   return List::create(Named("y") = y, Named("z") = z, Named("x") = x,
                       Named("obj") = obj, Named("info") = info,
@@ -269,11 +272,12 @@ List sglssnal_main(const arma::sp_mat &A, const arma::vec &b, double lam1,
 
 // [[Rcpp::export]]
 List sglssnal_main_interface(const arma::sp_mat &A, const arma::vec &b,
-                             double lam1, double lam2, const arma::sp_mat &pma,
-                             const arma::uvec &g, const arma::mat &ind,
-                             uint num_group, const List &parmain,
-                             const arma::vec &y0, const arma::vec &z0,
-                             const arma::vec &x0) {
-  GroupStruct gs = {pma, g, ind, num_group};
+                             double lam1, double lam2, const List &gs_list,
+                             const List &parmain, const arma::vec &y0,
+                             const arma::vec &z0, const arma::vec &x0) {
+  uvec G = as<uvec>(gs_list["G"]);
+  mat ind = as<mat>(gs_list["ind"]);
+  uint num_group = ind.n_cols;
+  GroupStruct gs = {as<sp_mat>(gs_list["pma"]), G, ind, num_group};
   return sglssnal_main(A, b, lam1, lam2, gs, parmain, y0, z0, x0);
 }

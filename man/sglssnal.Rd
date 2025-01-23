@@ -4,15 +4,27 @@
 \alias{sglssnal}
 \title{Run Sparse-Group Lasso via Semismooth Newton Augmented Lagrangian}
 \usage{
-sglssnal(Ainput, b, lambda, G, ind, options, y0 = NULL, z0 = NULL, x0 = NULL)
+sglssnal(
+  Ainput,
+  b,
+  lambda1,
+  lambda2,
+  G,
+  ind,
+  options,
+  y0 = NULL,
+  z0 = NULL,
+  x0 = NULL
+)
 }
 \arguments{
 \item{Ainput}{\eqn{n \times p} design matrix}
 
 \item{b}{\eqn{n} response vector}
 
-\item{lambda}{vector of length 2, \code{lambda[1]} is the
-\eqn{\ell_1} penalty and \code{lambda[2]} is the \eqn{\ell_2} penalty}
+\item{lambda1}{the \eqn{\ell_1} penalty}
+
+\item{lambda2}{the group-wise \eqn{\ell_2} penalty}
 
 \item{G}{vector of group indices}
 

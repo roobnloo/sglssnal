@@ -2,8 +2,8 @@
 #' @description Fits a sparse-group lasso model using second-order information.
 #' @param Ainput \eqn{n \times p} design matrix
 #' @param b \eqn{n} response vector
-#' @param lambda vector of length 2, `lambda[1]` is the
-#'   \eqn{\ell_1} penalty and `lambda[2]` is the \eqn{\ell_2} penalty
+#' @param lambda1 the \eqn{\ell_1} penalty
+#' @param lambda2 the group-wise \eqn{\ell_2} penalty
 #' @param G vector of group indices
 #' @param ind \eqn{3 \times g} matrix describing the groups in `G`;
 #'   `G[ind[1, i]:ind[2, i]]` are the indices of the `i`-th group and
@@ -17,8 +17,11 @@
 #' @useDynLib sglssnal
 #' @export
 sglssnal <- function(
-    Ainput, b, lambda, G, ind, options,
+    Ainput, b, lambda1, lambda2, G, ind, options,
     y0 = NULL, z0 = NULL, x0 = NULL) {
+  stopifnot("lambda1 and lambda2 must be nonnegative" = lambda1 >= 0 && lambda2 >= 0)
+  stopifnot("nrow(A) must be equal to length(b)" = nrow(Ainput) == length(b))
+
   stoptol <- 1e-6
   stoptol_gap <- stoptol
   printyes <- TRUE
@@ -33,17 +36,10 @@ sglssnal <- function(
   if (!is.null(options$maxit)) maxit <- options$maxit
   if (!is.null(options$stoptol_gap)) stoptol_gap <- options$stoptol_gap
 
-  n <- length(b)
-
-  if (length(lambda) != 2) stop("lambda must be a vector of length 2")
-  if (lambda[1] < 0 || lambda[2] < 0) stop("lambda must be non-negative")
-  if (n != nrow(Ainput)) stop("nrow(A) must be equal to length(b)")
-
-  normb <- 1 + norm(b, "2")
   A <- Ainput
+  n <- length(b)
   p <- ncol(A)
 
-  tstart <- Sys.time()
   eigsopt <- list(issym = TRUE)
   tstartLip <- Sys.time()
   Lip <- RSpectra::eigs(
@@ -64,13 +60,6 @@ sglssnal <- function(
     x <- x0
   }
 
-  # Group map
-  P <- group_structure(p, G, ind)
-  PP <- P
-  PP$G <- P$G - 1L
-  PP$ind[1, ] <- P$ind[1, ] - 1L
-  PP$ind[2, ] <- P$ind[2, ] - 1L
-
   parmain <- list(
     stoptol = stoptol,
     stoptol_gap = stoptol_gap,
@@ -84,52 +73,39 @@ sglssnal <- function(
   )
   if (!is.null(options$sigma)) parmain$sigma <- options$sigma
 
+  gs <- group_structure(p, G, ind)
   result <- sglssnal_main_interface(
-    A, b, lambda[1], lambda[2], PP$matrix, PP$G, PP$ind, PP$num_group,
-    parmain, y, z, x
+    A, b, lambda1, lambda2, gs, parmain, y, z, x
   )
   y <- result$y
   z <- result$z
   x <- result$x
   info_main <- result$info
+  runhist_main <- result$runhist
 
   iter <- info_main$iter
-  ttime <- as.numeric(difftime(Sys.time(), tstart, units = "secs"))
   msg <- info_main$msg
   if (iter == maxit) msg <- "maximum iteration reached"
-  Aty <- crossprod(A, y)
-  Ax <- A %*% x
-  Rd <- Aty + z
-  Px <- P$matrix %*% x
-  normRd <- norm(Rd, "2")
-  dualfeas <- normRd / (1 + norm(z, "2"))
-  Axb <- Ax - b
-  Rp <- Axb - y
-  normRp <- norm(Rp, "2")
-  primfeas <- normRp / normb
+  dualfeas <- runhist_main$dualfeas[iter]
+  primfeas <- runhist_main$primfeas[iter]
   maxfeas <- max(primfeas, dualfeas)
 
-  eta <- sqrt(sum((x - proximal_combo(x + z, lambda, P))^2)) / (1 + sqrt(sum(x^2)))
-
-  lasso <- lambda[2] * P$Lasso_fz(Px) + lambda[1] * sum(abs(x))
-  dualobj <- -sum(y^2) / 2 - sum(b * y)
-  primobj <- sum(Axb^2) / 2 + lasso
+  dualobj <- runhist_main$dualobj[iter]
+  primobj <- runhist_main$primobj[iter]
   obj <- c(primobj, dualobj)
-  gap <- primobj - dualobj
-  relgap <- abs(gap) / (1 + abs(primobj) + abs(dualobj))
 
   runhist <- list(
-    totaltime = ttime,
+    totaltime = info_main$ttime,
     primobj = primobj,
     dualobj = dualobj,
-    maxfeas = maxfeas,
-    eta = eta
+    maxfeas = max(runhist_main$primfeas[iter], runhist_main$dualfeas[iter]),
+    eta = info_main$eta
   )
   info <- list(
-    relgap = relgap,
+    relgap = info_main$relgap,
     iter = iter,
-    time = ttime,
-    eta = eta,
+    time = info_main$ttime,
+    eta = info_main$eta,
     obj = obj,
     maxfeas = maxfeas
   )
@@ -137,15 +113,17 @@ sglssnal <- function(
     message("\n****************************************")
     message(sprintf(" SSNAL       : %s", msg))
     message(sprintf(" iteration   : %d", iter))
-    message(sprintf(" time        : %3.2f", ttime))
+    message(sprintf(" time        : %3.2f", info_main$ttime))
     message(sprintf(" prim_obj    : %4.8e", primobj))
     message(sprintf(" dual_obj    : %4.8e", dualobj))
-    message(sprintf(" relgap      : %4.5e", relgap))
+    message(sprintf(" relgap      : %4.5e", info_main$relgap))
     message(sprintf(" primfeas    : %3.2e", primfeas))
     message(sprintf(" dualfeas    : %3.2e", dualfeas))
-    message(sprintf(" eta         : %3.2e", eta))
+    message(sprintf(" eta         : %3.2e", info_main$eta))
     message(sprintf(" nnz         : %d", cardcal(x)$k))
   }
 
-  return(list(obj = obj, y = y, z = z, x = x, info = info, runhist = runhist))
+  return(list(
+    obj = obj, y = y, z = z, x = x, info = info, runhist = runhist
+  ))
 }
