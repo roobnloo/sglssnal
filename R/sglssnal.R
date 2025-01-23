@@ -17,7 +17,7 @@
 #' @useDynLib sglssnal
 #' @export
 sglssnal <- function(
-    Ainput, b, lambda1, lambda2, G, ind, options,
+    Ainput, b, lambda1, lambda2, G, ind, options = list(),
     y0 = NULL, z0 = NULL, x0 = NULL) {
   stopifnot("lambda1 and lambda2 must be nonnegative" = lambda1 >= 0 && lambda2 >= 0)
   stopifnot("nrow(A) must be equal to length(b)" = nrow(Ainput) == length(b))
