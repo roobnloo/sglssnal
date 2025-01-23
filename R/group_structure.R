@@ -1,4 +1,4 @@
-group_structure <- function(n, G, ind) {
+group_structure <- function(n, G, ind, pfgroup) {
   len_group <- (ind[2, ] - ind[1, ]) + 1
 
   gs <- list()
@@ -16,7 +16,9 @@ group_structure <- function(n, G, ind) {
   ind[1, ] <- ind[1, ] - 1L
   ind[2, ] <- ind[2, ] - 1L
 
-  gs$ind <- ind
+  indw <- rbind(ind, pfgroup)
+
+  gs$ind <- indw
   gs$G <- G
 
   return(gs)

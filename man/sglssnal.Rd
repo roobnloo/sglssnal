@@ -9,30 +9,51 @@ sglssnal(
   b,
   lambda1,
   lambda2,
-  G,
-  ind,
-  options = list(),
+  grp_vec,
+  grp_idx,
+  pfgroup = rep(1, ncol(grp_idx)),
+  stoptol = 1e-06,
+  stopopt = 2L,
+  printyes = TRUE,
+  printsub = FALSE,
+  maxit = 5000L,
   y0 = NULL,
   z0 = NULL,
   x0 = NULL
 )
 }
 \arguments{
-\item{Ainput}{\eqn{n \times p} design matrix}
+\item{Ainput}{\eqn{n \times p} design matrix.}
 
-\item{b}{\eqn{n} response vector}
+\item{b}{\eqn{n} response vector.}
 
-\item{lambda1}{the \eqn{\ell_1} penalty}
+\item{lambda1}{The \eqn{\ell_1} penalty.}
 
-\item{lambda2}{the group-wise \eqn{\ell_2} penalty}
+\item{lambda2}{The group-wise \eqn{\ell_2} penalty.}
 
-\item{G}{vector of group indices}
+\item{grp_vec}{Vector of indicies of variables in each group.
+If there are \eqn{g} groups and \code{G_i} contains the indices of the
+\code{i}-th group, then \code{grp_vec} should be the concatenated vector
+\code{c(G_1, G_2, ..., G_g)}.}
 
-\item{ind}{\eqn{3 \times g} matrix describing the groups in \code{G};
-\code{G[ind[1, i]:ind[2, i]]} are the indices of the \code{i}-th group and
-\code{ind[3, i]} is the weight of the group.}
+\item{grp_idx}{\eqn{2 \times g} matrix indexing the groups in \code{grp_vec}.
+\code{grp_vec[grp_idx[1, i]:grp_idx[2, i]]} are the indices of the \code{i}-th
+group.}
 
-\item{options}{control options}
+\item{pfgroup}{Penalty factor for each group in the group lasso.
+Default is a vector of ones, indicating no weighting.}
+
+\item{stoptol}{Tolerance for stopping criteria. Default is \code{1e-6}.}
+
+\item{stopopt}{Stopping criteria. 1: relative duality gap and feasibility,
+2: KKT conditions, 3: dual feasibility and relative duality gap,
+4: dual feasibility and absolute duality gap. Default is \code{2L}.}
+
+\item{printyes}{Print progress in main loop. Default is \code{TRUE}.}
+
+\item{printsub}{Print progress in subproblem. Default is \code{FALSE}.}
+
+\item{maxit}{Maximum number of iterations. Default is \code{5000L}.}
 
 \item{y0}{optional initialization vector}
 
@@ -41,8 +62,23 @@ sglssnal(
 \item{x0}{optional initialization vector}
 }
 \value{
-list
+List containing the following components:
+\itemize{
+\item \code{obj}: Vector containing primal and dual objective values at the solution.
+\item \code{x}: The primal variable of interest.
+\item \code{y}: The y dual variable.
+\item \code{z}: The z dual variable.
+\item \code{info}: List containing information about the optimization process such as
+relative gap, iteration number, and run time.
+}
 }
 \description{
-Fits a sparse-group lasso model using second-order information.
+Fits a sparse-group lasso model using
+second-order information to solve the dual problem.
+}
+\references{
+Zhang, Y., Zhang, N., Sun, D., & Toh, K. C. (2020).
+\emph{An efficient Hessian based algorithm for solving large-scale
+sparse group Lasso problems.} Mathematical Programming, 179, 223-263.
+\doi{https://doi.org/10.1007/s10107-018-1329-6}.
 }

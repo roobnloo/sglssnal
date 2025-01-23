@@ -37,7 +37,6 @@ List sglssnal_main(const arma::sp_mat &A, const arma::vec &b, double lam1,
   bool printyes = as<bool>(parmain["printyes"]);
   bool printsub = as<bool>(parmain["printsub"]);
   double stoptol = as<double>(parmain["stoptol"]);
-  double stoptol_gap = as<double>(parmain["stoptol_gap"]);
   int stopopt = as<int>(parmain["stopopt"]);
   int p = as<int>(parmain["p"]);
   int n = as<int>(parmain["n"]);
@@ -71,7 +70,7 @@ List sglssnal_main(const arma::sp_mat &A, const arma::vec &b, double lam1,
 
   if (printyes) {
     Rcout << "\n n=" << p << ", m=" << n << ", tol=" << stoptol
-          << ", parameters:c1=" << lam1 << ", c2=" << lam2 << "\n";
+          << ", parameters: lambda1=" << lam1 << ", lambda2=" << lam2 << "\n";
     Rcout << " ---------------------------------------------------\n";
     Rcout << " iter|  [pinfeas   dinfeas]    relgap |    pobj      dobj    "
           << " | time(s)  |   sigma  |\n";
@@ -163,7 +162,7 @@ List sglssnal_main(const arma::sp_mat &A, const arma::vec &b, double lam1,
         stop = eta_1 < stoptol;
       }
     } else if (stopopt == 3) {
-      stop = (dualfeas < stoptol) && (relgap < stoptol_gap);
+      stop = (dualfeas < stoptol) && (relgap < stoptol);
     } else if (stopopt == 4) {
       stop = (dualfeas < stoptol) && (gap < stoptol * sum(square(b)));
     }
