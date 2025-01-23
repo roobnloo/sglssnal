@@ -11,16 +11,12 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// sglssn_conjgrad_interface
-List sglssn_conjgrad_interface(const arma::vec& y0, const arma::vec& Aty0, const arma::vec& x0, const arma::vec& Ax0, const arma::sp_mat& A, const arma::vec& b, double lam1, double lam2, const arma::sp_mat& pma, const arma::uvec& g, const arma::mat& ind, uint num_group, List& par, bool printsub, int maxitersub, double tol);
-RcppExport SEXP _sglssnal_sglssn_conjgrad_interface(SEXP y0SEXP, SEXP Aty0SEXP, SEXP x0SEXP, SEXP Ax0SEXP, SEXP ASEXP, SEXP bSEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP pmaSEXP, SEXP gSEXP, SEXP indSEXP, SEXP num_groupSEXP, SEXP parSEXP, SEXP printsubSEXP, SEXP maxitersubSEXP, SEXP tolSEXP) {
+// sglssnal_main_interface
+List sglssnal_main_interface(const arma::sp_mat& A, const arma::vec& b, double lam1, double lam2, const arma::sp_mat& pma, const arma::uvec& g, const arma::mat& ind, uint num_group, const List& parmain, const arma::vec& y0, const arma::vec& z0, const arma::vec& x0);
+RcppExport SEXP _sglssnal_sglssnal_main_interface(SEXP ASEXP, SEXP bSEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP pmaSEXP, SEXP gSEXP, SEXP indSEXP, SEXP num_groupSEXP, SEXP parmainSEXP, SEXP y0SEXP, SEXP z0SEXP, SEXP x0SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type y0(y0SEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type Aty0(Aty0SEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type x0(x0SEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type Ax0(Ax0SEXP);
     Rcpp::traits::input_parameter< const arma::sp_mat& >::type A(ASEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
     Rcpp::traits::input_parameter< double >::type lam1(lam1SEXP);
@@ -29,17 +25,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::uvec& >::type g(gSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type ind(indSEXP);
     Rcpp::traits::input_parameter< uint >::type num_group(num_groupSEXP);
-    Rcpp::traits::input_parameter< List& >::type par(parSEXP);
-    Rcpp::traits::input_parameter< bool >::type printsub(printsubSEXP);
-    Rcpp::traits::input_parameter< int >::type maxitersub(maxitersubSEXP);
-    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(sglssn_conjgrad_interface(y0, Aty0, x0, Ax0, A, b, lam1, lam2, pma, g, ind, num_group, par, printsub, maxitersub, tol));
+    Rcpp::traits::input_parameter< const List& >::type parmain(parmainSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y0(y0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type z0(z0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x0(x0SEXP);
+    rcpp_result_gen = Rcpp::wrap(sglssnal_main_interface(A, b, lam1, lam2, pma, g, ind, num_group, parmain, y0, z0, x0));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_sglssnal_sglssn_conjgrad_interface", (DL_FUNC) &_sglssnal_sglssn_conjgrad_interface, 16},
+    {"_sglssnal_sglssnal_main_interface", (DL_FUNC) &_sglssnal_sglssnal_main_interface, 12},
     {NULL, NULL, 0}
 };
 

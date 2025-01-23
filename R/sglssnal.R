@@ -22,11 +22,14 @@ sglssnal <- function(
   stoptol <- 1e-6
   stoptol_gap <- stoptol
   printyes <- TRUE
+  printsub <- TRUE
   maxit <- 5000
   stopopt <- 2 # 1:relgap+feas 2:kkt
   if (!is.null(options$stoptol)) stoptol <- options$stoptol
   if (!is.null(options$stopopt)) stopopt <- options$stopopt
   if (!is.null(options$printyes)) printyes <- options$printyes
+  if (!is.null(options$printsub)) printsub <- options$printsub
+  if (!printyes) printsub <- FALSE
   if (!is.null(options$maxit)) maxit <- options$maxit
   if (!is.null(options$stoptol_gap)) stoptol_gap <- options$stoptol_gap
 
@@ -52,11 +55,10 @@ sglssnal <- function(
     Lip, as.numeric(difftime(Sys.time(), tstartLip, units = "secs"))
   ))
 
-  if (is.null(y0) || is.null(z0) || is.null(x0)) {
-    y <- rep(0, n)
-    z <- rep(0, p)
-    x <- z
-  } else {
+  y <- rep(0, n)
+  z <- rep(0, p)
+  x <- z
+  if (!is.null(y0) && !is.null(z0) && !is.null(x0)) {
     y <- y0
     z <- z0
     x <- x0
@@ -64,21 +66,28 @@ sglssnal <- function(
 
   # Group map
   P <- group_structure(p, G, ind)
+  PP <- P
+  PP$G <- P$G - 1L
+  PP$ind[1, ] <- P$ind[1, ] - 1L
+  PP$ind[2, ] <- P$ind[2, ] - 1L
 
   parmain <- list(
-    tstart = tstart,
     stoptol = stoptol,
     stoptol_gap = stoptol_gap,
     Lip = Lip,
     maxit = maxit,
     stopopt = stopopt,
     printyes = printyes,
+    printsub = printsub,
     p = p,
     n = n
   )
   if (!is.null(options$sigma)) parmain$sigma <- options$sigma
 
-  result <- sglssnal_main(A, b, lambda, P, parmain, y, z, x)
+  result <- sglssnal_main_interface(
+    A, b, lambda[1], lambda[2], PP$matrix, PP$G, PP$ind, PP$num_group,
+    parmain, y, z, x
+  )
   y <- result$y
   z <- result$z
   x <- result$x

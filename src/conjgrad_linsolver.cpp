@@ -99,9 +99,9 @@ bool mat2_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,
   return true;
 }
 
-List conjgrad_linsolver_impl(const arma::sp_mat &A, const arma::vec &rhs,
-                             const arma::vec &u, double lam1, double lam2,
-                             const GroupStruct &gs, int density, double sig) {
+List conjgrad_linsolver(const arma::sp_mat &A, const arma::vec &rhs,
+                        const arma::vec &u, double lam1, double lam2,
+                        const GroupStruct &gs, int density, double sig) {
   int n = rhs.n_elem;
   int solver = 1; // 1: direct, 2: direct woodbury-formula, 3: pcg
   int dn = 10000;

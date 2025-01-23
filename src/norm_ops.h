@@ -11,5 +11,7 @@ arma::vec proximal_combo(const arma::vec &v, double lam1, double lam2,
                          const GroupStruct &gs);
 arma::vec projection_l2(const arma::vec &z, double lam, const GroupStruct &gs,
                         arma::vec &grp_norms);
+double group_l2_norm(const arma::vec &z, const GroupStruct &gs);
+int cardcal(const arma::vec &x, double r = 0.999);
 
 #endif

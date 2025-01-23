@@ -16,7 +16,7 @@ arma::vec proximal_l2(const arma::vec &z, double lam, const GroupStruct &gs) {
 
   arma::vec result = z;
 
-  for (int i = 0; i < gs.num_group; ++i) {
+  for (uint i = 0; i < gs.num_group; ++i) {
     int kstart = gs.ind(0, i);
     int kend = gs.ind(1, i);
     int w = lam * gs.ind(2, i);
@@ -44,7 +44,7 @@ arma::vec projection_l2(const arma::vec &z, double lam, const GroupStruct &gs,
 
   arma::vec Pz(size(z));
 
-  for (int i = 0; i < gs.num_group; ++i) {
+  for (uint i = 0; i < gs.num_group; ++i) {
     int kstart = gs.ind(0, i);
     int kend = gs.ind(1, i);
     double w = lam * gs.ind(2, i);
@@ -72,4 +72,23 @@ arma::vec proximal_combo(const arma::vec &v, double lam1, double lam2,
   u = projection_l2(u, lam2, gs, grp_norms);
   u = utmp - gs.pma.t() * u;
   return u;
+}
+
+double group_l2_norm(const arma::vec &z, const GroupStruct &gs) {
+  double sum_norms = 0;
+  for (uint i = 0; i < gs.num_group; ++i) {
+    sum_norms += gs.ind(2, i) * norm(z.subvec(gs.ind(0, i), gs.ind(1, i)), 2);
+  }
+
+  return sum_norms;
+}
+
+// Computes the number of non-zero elements of x up to a tolerance of r.
+int cardcal(const arma::vec &x, double r) {
+  double normx1 = sum(abs(x));
+
+  vec absx_sorted = sort(abs(x), "descend");
+  vec cumsum_absx = cumsum(absx_sorted);
+  uword k = index_min(cumsum_absx >= r * normx1);
+  return k + 1;
 }

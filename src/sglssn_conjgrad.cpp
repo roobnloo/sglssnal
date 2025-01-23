@@ -1,6 +1,8 @@
+#include "sglssn_conjgrad.h"
 #include "conjgrad_linsolver.h"
 #include "norm_ops.h"
 #include <RcppArmadillo.h>
+#include <ios>
 using namespace Rcpp;
 using namespace arma;
 
@@ -9,8 +11,12 @@ List findstep_impl(const arma::vec &b, double sig, double psi_y0,
                    const arma::vec &sigProx_u0, const arma::vec &z0,
                    const arma::vec &y0, const arma::vec &Aty0,
                    const arma::vec &dy, const arma::vec &Atdy, double lam1,
-                   double lam2, const GroupStruct &gs, double tol, int stepop) {
-  int printlevel = 1;
+                   double lam2, const GroupStruct &gs, double tol, int stepop,
+                   bool printsub) {
+
+  if (printsub) {
+    Rcout << std::scientific << std::setprecision(2) << std::setw(3);
+  }
   int maxit = std::ceil(std::log(1 / (tol + datum::eps)) / std::log(2.0));
   double c1 = 1e-4;
   double c2 = 0.9;
@@ -22,7 +28,7 @@ List findstep_impl(const arma::vec &b, double sig, double psi_y0,
   double g0 = sig * cross - tmp1;
   if (g0 <= 0) {
     double alp = 0;
-    if (printlevel) {
+    if (printsub) {
       Rcpp::Rcout << "\n Need an ascent direction, " << g0 << "  " << std::endl;
     }
     return List::create(
@@ -51,18 +57,19 @@ List findstep_impl(const arma::vec &b, double sig, double psi_y0,
     psi_y =
         -(dot(b, y) + 0.5 * sum(square(y)) + 0.5 * sig * sum(square(Prox_u)));
 
-    if (printlevel > 1) {
-      Rcpp::Rcout << "\n --------------------------------------- " << std::endl;
-      Rcpp::Rcout << " alp = " << alp << ", psi_y = " << psi_y
-                  << ", psi_y0 = " << psi_y0 << std::endl;
-      Rcpp::Rcout << " --------------------------------------- " << std::endl;
-    }
+    // if (printsub) {
+    //   Rcpp::Rcout << "\n --------------------------------------- " <<
+    //   std::endl; Rcpp::Rcout << " alp = " << alp << ", psi_y = " << psi_y
+    //               << ", psi_y0 = " << psi_y0 << std::endl;
+    //   Rcpp::Rcout << " --------------------------------------- " <<
+    //   std::endl;
+    // }
 
     if (iter == 0) {
       gLB = g0;
       gUB = galp;
       if (sign(gLB) * sign(gUB) > 0) {
-        if (printlevel)
+        if (printsub)
           Rcpp::Rcout << "|";
         Aty = Aty0 + alp * Atdy;
         return List::create(
@@ -76,7 +83,7 @@ List findstep_impl(const arma::vec &b, double sig, double psi_y0,
         (psi_y - psi_y0 - c1 * alp * g0 >
          1e-8 / std::max(1.0, std::abs(psi_y0)))) {
       if (stepop == 1 || (stepop == 2 && std::abs(galp) < tol)) {
-        if (printlevel)
+        if (printsub)
           Rcpp::Rcout << ":";
         Aty = Aty0 + alp * Atdy;
         return List::create(
@@ -99,7 +106,7 @@ List findstep_impl(const arma::vec &b, double sig, double psi_y0,
   if (iter == maxit) {
     Aty = Aty0 + alp * Atdy;
   }
-  if (printlevel)
+  if (printsub)
     Rcpp::Rcout << "m";
   return List::create(Named("psi_y") = psi_y, Named("u") = u,
                       Named("Prox_u") = Prox_u, Named("sigProx_u") = sigProx_u,
@@ -107,12 +114,11 @@ List findstep_impl(const arma::vec &b, double sig, double psi_y0,
                       Named("alp") = alp, Named("iter") = iter);
 }
 
-List sglssn_conjgrad_impl(const arma::vec &y0, const arma::vec &Aty0,
-                          const arma::vec &x0, const arma::vec &Ax0,
-                          const arma::sp_mat &A, const arma::vec &b,
-                          double lam1, double lam2, const GroupStruct &gs,
-                          List &par, bool printsub, int maxitersub,
-                          double tol) {
+List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
+                     const arma::vec &x0, const arma::vec &Ax0,
+                     const arma::sp_mat &A, const arma::vec &b, double lam1,
+                     double lam2, const GroupStruct &gs, List &par,
+                     bool printsub, int maxitersub, double tol) {
   int breakyes = 0;
   double tiny = 1e-10;
   int maxitpsqmr = 500;
@@ -207,7 +213,7 @@ List sglssn_conjgrad_impl(const arma::vec &y0, const arma::vec &Aty0,
     int nnz = sum(abs(x) > tol);
     par["nnz"] = nnz;
 
-    List result = conjgrad_linsolver_impl(A, rhs, u, lam1, lam2, gs, nnz, sig);
+    List result = conjgrad_linsolver(A, rhs, u, lam1, lam2, gs, nnz, sig);
     arma::vec dy = as<arma::vec>(result["dy"]);
     arma::vec resnrm = as<arma::vec>(result["resnrm"]);
     int solve_ok = as<int>(result["solve_ok"]);
@@ -226,7 +232,7 @@ List sglssn_conjgrad_impl(const arma::vec &y0, const arma::vec &Aty0,
 
     List step_result =
         findstep_impl(b, sig, psi_y, u, Prox_u, sigProx_u, z, y, Aty, dy, Atdy,
-                      lam1, lam2, gs, steptol, stepop);
+                      lam1, lam2, gs, steptol, stepop, printsub);
     psi_y = as<double>(step_result["psi_y"]);
     u = as<arma::vec>(step_result["u"]);
     Prox_u = as<arma::vec>(step_result["Prox_u"]);
@@ -366,17 +372,4 @@ List sglssn_conjgrad_impl(const arma::vec &y0, const arma::vec &Aty0,
                       Named("Prox_u") = Prox_u, Named("x") = sig * Prox_u,
                       Named("Ax") = Ax, Named("par") = par,
                       Named("runhist") = runhist, Named("info") = info);
-}
-
-// [[Rcpp::export]]
-List sglssn_conjgrad_interface(const arma::vec &y0, const arma::vec &Aty0,
-                               const arma::vec &x0, const arma::vec &Ax0,
-                               const arma::sp_mat &A, const arma::vec &b,
-                               double lam1, double lam2,
-                               const arma::sp_mat &pma, const arma::uvec &g,
-                               const arma::mat &ind, uint num_group, List &par,
-                               bool printsub, int maxitersub, double tol) {
-  GroupStruct gs = {pma, g, ind, num_group};
-  return sglssn_conjgrad_impl(y0, Aty0, x0, Ax0, A, b, lam1, lam2, gs, par,
-                              printsub, maxitersub, tol);
 }
