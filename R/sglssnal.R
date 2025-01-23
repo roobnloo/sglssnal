@@ -120,7 +120,7 @@ sglssnal <- function(
     message(sprintf(" primfeas    : %3.2e", primfeas))
     message(sprintf(" dualfeas    : %3.2e", dualfeas))
     message(sprintf(" eta         : %3.2e", info_main$eta))
-    message(sprintf(" nnz         : %d", cardcal(x)$k))
+    message(sprintf(" nnz         : %d", runhist_main$nnz))
   }
 
   return(list(
