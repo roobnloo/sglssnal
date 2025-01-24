@@ -1,0 +1,92 @@
+#' Cross-validation for sglssnal
+#' @inheritParams sglssnal
+#' @param lambdas Vector of lambda parameters to tune.
+#' @param alphas Vector of alpha parameters to tune.
+#' @param nfolds Number of folds for cross-validation.
+#'   Ignored if `foldid` is provided.
+#' @param foldid Vector of integers specifying the fold for each observation.
+#'   If `NULL`, a default assignment is used.
+#' @param ... Additional arguments passed to [sglssnal()].
+#' @export
+cv.sglssnal <- function(
+    A, b, grp_vec, grp_idx, lambdas, alphas,
+    nfolds = 5, foldid = NULL, printyes = TRUE, ...) {
+  nlambda <- length(lambdas)
+  nalpha <- length(alphas)
+  n <- length(b)
+  p <- ncol(A)
+  stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
+
+  cv_err <- matrix(0, nlambda, nalpha)
+
+  cut <- NULL
+  if (is.null(foldid)) {
+    fold_sizes <- rep(floor(n / nfolds), nfolds)
+    fold_sizes[nfolds] <- fold_sizes[nfolds] + (n %% nfolds)
+    cut <- rep(1:nfolds, fold_sizes)
+  } else {
+    stopifnot("foldid must be a vector of integers" = is.integer(foldid))
+    stopifnot("length(foldid) must equal nrow(A)" = length(foldid) == nrow(A))
+    stopifnot()
+    cut <- rank(foldid)
+    nfolds <- max(cut)
+  }
+
+  message("Cross-validation with ", nfolds, " folds")
+  tstart <- Sys.time()
+  for (t in 1:nfolds) {
+    tstart_fold <- Sys.time()
+    foldidx1 <- cut != t
+    Atrain <- A[foldidx1, , drop = FALSE]
+    btrain <- b[foldidx1]
+    foldidx2 <- cut == t
+    Atest <- A[foldidx2, , drop = FALSE]
+    btest <- b[foldidx2]
+
+    for (k in 1:nalpha) {
+      y0 <- rep(0, length(btrain))
+      z0 <- rep(0, p)
+      x0 <- rep(0, p)
+
+      for (i in 1:nlambda) {
+        lambda <- lambdas[i]
+        alpha <- alphas[k]
+        result <- sglssnal(
+          Atrain, btrain, grp_vec, grp_idx, lambda, alpha,
+          y0 = y0, z0 = z0, x0 = x0, printyes = FALSE, ...
+        )
+        y0 <- result$y
+        z0 <- result$z
+        x0 <- result$x
+        res <- Atest %*% x0 - btest
+        cv_err[i, k] <- cv_err[i, k] + sum(res^2)
+      }
+    }
+    message(
+      sprintf(
+        "Fold %d - %3.2fs", t,
+        as.numeric(difftime(Sys.time(), tstart_fold, units = "secs"))
+      )
+    )
+  }
+  message(
+    sprintf(
+      "Total time: %3.2fs",
+      as.numeric(difftime(Sys.time(), tstart, units = "secs"))
+    )
+  )
+
+  min_error <- which(cv_err == min(cv_err), arr.ind = TRUE)
+  min_lambda_id <- min_error[1, 1]
+  min_alpha_id <- min_error[1, 2]
+  message(sprintf(
+    "Minimum error at (lambda, alpha) index (%d, %d)",
+    min_lambda_id, min_alpha_id
+  ))
+
+  result <- sglssnal(
+    A, b, grp_vec, grp_idx, lambdas[min_lambda_id], alphas[min_alpha_id],
+    printyes = printyes, ...
+  )
+  return(result)
+}

@@ -1,10 +1,8 @@
 #' Run Sparse-Group Lasso via Semismooth Newton Augmented Lagrangian
 #' @description Fits a sparse-group lasso model using
 #'   second-order information to solve the dual problem.
-#' @param Ainput \eqn{n \times p} design matrix.
+#' @param A \eqn{n \times p} design matrix.
 #' @param b \eqn{n} response vector.
-#' @param lambda1 The \eqn{\ell_1} penalty.
-#' @param lambda2 The group-wise \eqn{\ell_2} penalty.
 #' @param grp_vec Vector of indicies of variables in each group.
 #'   If there are \eqn{g} groups and `G_i` contains the indices of the
 #'   `i`-th group, then `grp_vec` should be the concatenated vector
@@ -12,6 +10,11 @@
 #' @param grp_idx \eqn{2 \times g} matrix indexing the groups in `grp_vec`.
 #'   `grp_vec[grp_idx[1, i]:grp_idx[2, i]]` are the indices of the `i`-th
 #'   group.
+#' @param lambda Penalty parameter together with `alpha`.
+#'   `alpha * lambda` is the \eqn{\ell_1} penalty and `(1 - alpha) * lambda`
+#'   is the group \eqn{\ell_2} penalty.
+#' @param alpha Determines the relative weight of the \eqn{\ell_1} and
+#'   group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}.
 #' @param pfgroup Penalty factor for each group in the group lasso.
 #'   Default is a vector of ones, indicating no weighting.
 #' @param stoptol Tolerance for stopping criteria. Default is `1e-6`.
@@ -39,18 +42,22 @@
 #'   \doi{https://doi.org/10.1007/s10107-018-1329-6}.
 #' @export
 sglssnal <- function(
-    Ainput, b, lambda1, lambda2, grp_vec, grp_idx,
+    A, b, grp_vec, grp_idx, lambda, alpha,
     pfgroup = rep(1, ncol(grp_idx)), stoptol = 1e-6, stopopt = 2L,
     printyes = TRUE, printsub = FALSE, maxit = 5000L,
     y0 = NULL, z0 = NULL, x0 = NULL) {
-  stopifnot("lambda1 and lambda2 must be nonnegative" = lambda1 >= 0 && lambda2 >= 0)
-  stopifnot("nrow(A) must be equal to length(b)" = nrow(Ainput) == length(b))
+  stopifnot("lambda must be nonnegative" = lambda >= 0)
+  stopifnot("alpha must be in [0, 1]" = alpha >= 0 & alpha <= 1)
+  stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
   stopifnot("length(pfgroup) must be equal to ncol(grp_idx)" = length(pfgroup) == ncol(grp_idx))
   stopifnot("stopopt must be one of 1, 2, 3, or 4" = stopopt %in% c(1L, 2L, 3L, 4L))
   stopifnot("maxit must be a positive integer" = maxit > 0)
   stopifnot("stoptol must be a positive number" = stoptol > 0)
 
-  A <- Matrix::Matrix(Ainput, sparse = TRUE)
+  lambda1 <- alpha * lambda
+  lambda2 <- lambda * (1 - alpha)
+
+  A <- Matrix::Matrix(A, sparse = TRUE)
   n <- length(b)
   p <- ncol(A)
 
@@ -60,10 +67,12 @@ sglssnal <- function(
     tcrossprod(A),
     k = 1, which = "LA", opts = eigsopt, n = n
   )$values
-  message(sprintf(
-    "\n Lip = %3.2e, time = %3.2f",
-    Lip, as.numeric(difftime(Sys.time(), tstartLip, units = "secs"))
-  ))
+  if (printyes) {
+    message(sprintf(
+      "\n Lip = %3.2e, time = %3.2f",
+      Lip, as.numeric(difftime(Sys.time(), tstartLip, units = "secs"))
+    ))
+  }
 
   y <- rep(0, n)
   z <- rep(0, p)
@@ -111,13 +120,14 @@ sglssnal <- function(
     iter = iter,
     time_seconds = info_main$ttime,
     eta = info_main$eta,
-    maxfeas = maxfeas
+    maxfeas = maxfeas,
+    nnz = runhist_main$nnz
   )
-  message("\n****************************************")
-  message(sprintf(" SSNAL       : %s", msg))
-  message(sprintf(" iteration   : %d", iter))
-  message(sprintf(" time(s)     : %3.2f", info_main$ttime))
   if (printyes) {
+    message("\n****************************************")
+    message(sprintf(" SSNAL       : %s", msg))
+    message(sprintf(" iteration   : %d", iter))
+    message(sprintf(" time(s)     : %3.2f", info_main$ttime))
     message(sprintf(" prim_obj    : %4.8e", primobj))
     message(sprintf(" dual_obj    : %4.8e", dualobj))
     message(sprintf(" relgap      : %4.5e", info_main$relgap))

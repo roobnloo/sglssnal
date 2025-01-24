@@ -5,12 +5,12 @@
 \title{Run Sparse-Group Lasso via Semismooth Newton Augmented Lagrangian}
 \usage{
 sglssnal(
-  Ainput,
+  A,
   b,
-  lambda1,
-  lambda2,
   grp_vec,
   grp_idx,
+  lambda,
+  alpha,
   pfgroup = rep(1, ncol(grp_idx)),
   stoptol = 1e-06,
   stopopt = 2L,
@@ -23,13 +23,9 @@ sglssnal(
 )
 }
 \arguments{
-\item{Ainput}{\eqn{n \times p} design matrix.}
+\item{A}{\eqn{n \times p} design matrix.}
 
 \item{b}{\eqn{n} response vector.}
-
-\item{lambda1}{The \eqn{\ell_1} penalty.}
-
-\item{lambda2}{The group-wise \eqn{\ell_2} penalty.}
 
 \item{grp_vec}{Vector of indicies of variables in each group.
 If there are \eqn{g} groups and \code{G_i} contains the indices of the
@@ -39,6 +35,13 @@ If there are \eqn{g} groups and \code{G_i} contains the indices of the
 \item{grp_idx}{\eqn{2 \times g} matrix indexing the groups in \code{grp_vec}.
 \code{grp_vec[grp_idx[1, i]:grp_idx[2, i]]} are the indices of the \code{i}-th
 group.}
+
+\item{lambda}{Penalty parameter together with \code{alpha}.
+\code{alpha * lambda} is the \eqn{\ell_1} penalty and \code{(1 - alpha) * lambda}
+is the group \eqn{\ell_2} penalty.}
+
+\item{alpha}{Determines the relative weight of the \eqn{\ell_1} and
+group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}.}
 
 \item{pfgroup}{Penalty factor for each group in the group lasso.
 Default is a vector of ones, indicating no weighting.}
