@@ -16,30 +16,37 @@ cv.sglssnal <- function(
   n <- length(b)
   p <- ncol(A)
   stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
+  if (!is.null(foldid)) {
+    stopifnot(
+      "length(foldid) must be equal to nrow(A)" = length(foldid) == nrow(A)
+    )
+    stopifnot(
+      "foldid must be a contiguous vector starting from 1" =
+        all(foldid >= 1) && all(diff(sort(unique(foldid))) == 1)
+    )
+  }
 
   cv_err <- matrix(0, nlambda, nalpha)
 
-  cut <- NULL
   if (is.null(foldid)) {
     fold_sizes <- rep(floor(n / nfolds), nfolds)
     fold_sizes[nfolds] <- fold_sizes[nfolds] + (n %% nfolds)
-    cut <- rep(1:nfolds, fold_sizes)
+    foldid <- rep(1:nfolds, fold_sizes)
   } else {
     stopifnot("foldid must be a vector of integers" = is.integer(foldid))
     stopifnot("length(foldid) must equal nrow(A)" = length(foldid) == nrow(A))
     stopifnot()
-    cut <- rank(foldid)
-    nfolds <- max(cut)
+    nfolds <- max(foldid)
   }
 
   message("Cross-validation with ", nfolds, " folds")
   tstart <- Sys.time()
   for (t in 1:nfolds) {
     tstart_fold <- Sys.time()
-    foldidx1 <- cut != t
+    foldidx1 <- foldid != t
     Atrain <- A[foldidx1, , drop = FALSE]
     btrain <- b[foldidx1]
-    foldidx2 <- cut == t
+    foldidx2 <- foldid == t
     Atest <- A[foldidx2, , drop = FALSE]
     btest <- b[foldidx2]
 
@@ -88,5 +95,11 @@ cv.sglssnal <- function(
     A, b, grp_vec, grp_idx, lambdas[min_lambda_id], alphas[min_alpha_id],
     printyes = printyes, ...
   )
+
+  cv_info <- list(
+    cvm = cv_err,
+    cv_idx = c("cv_lambda_id" = min_lambda_id, "cv_alpha_id" = min_alpha_id)
+  )
+  result$cv_info <- cv_info
   return(result)
 }

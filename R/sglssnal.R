@@ -121,7 +121,8 @@ sglssnal <- function(
     time_seconds = info_main$ttime,
     eta = info_main$eta,
     maxfeas = maxfeas,
-    nnz = runhist_main$nnz
+    nnz = runhist_main$nnz,
+    mse = mean((as.numeric(b - A %*% x))^2)
   )
   if (printyes) {
     message("\n****************************************")
