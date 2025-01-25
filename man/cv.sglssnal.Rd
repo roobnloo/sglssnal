@@ -16,6 +16,7 @@ cv.sglssnal(
   printyes = TRUE,
   stoptol = 1e-06,
   stoptolcv = 1e-04,
+  quietall = FALSE,
   ...
 )
 }
@@ -50,6 +51,8 @@ If \code{NULL}, a default assignment is used.}
 \item{stoptolcv}{Tolerance for convergence in cross-validation folds.
 May be set to a smaller value than \code{stoptol} for faster convergence.
 Default is \code{1e-4}.}
+
+\item{quietall}{Suppress all messages.}
 
 \item{...}{Additional arguments passed to \code{\link[=sglssnal]{sglssnal()}}.}
 }

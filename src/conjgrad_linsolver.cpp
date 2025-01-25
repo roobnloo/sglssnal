@@ -12,13 +12,16 @@ void mat_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,
   prox1u = proximal_l1(u, lam1);
   vec pv = gs.pma * prox1u;
   int n = A.n_rows;
+  int nvars = A.n_cols;
   vec grp_norms(gs.num_group);
   proj2pv = projection_l2(pv, lam2, gs, grp_norms);
   if (!any(prox1u) || !any(grp_norms)) {
     V = eye(n, n);
+    return;
   }
 
   V = zeros(n, n);
+  vec DD = zeros(nvars);
 
   for (uint k = 0; k < gs.num_group; k++) {
     if (grp_norms(k) <= datum::eps) {
@@ -30,21 +33,21 @@ void mat_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,
     double par1 = sig * cw / grp_norms(k);
     double par2 = par1 / (grp_norms(k) * grp_norms(k));
 
-    sp_mat Al = gs.get_group_subview(A, k);
+    // sp_mat Al = gs.get_group_subview(A, k);
+    uvec subview_col_ids = gs.elem_ids.subvec(gs.ind(0, k), gs.ind(1, k));
     uvec indvk = find(vk);
-    Al = Al.cols(indvk);
+    subview_col_ids = subview_col_ids(indvk);
 
-    sp_mat M1 = Al * Al.t();
-    V += (sig - par1) * M1;
+    DD(subview_col_ids) += sig - par1;
 
     if (any(abs(vk) > datum::eps)) {
-      vec pv = vk(indvk);
-      vec Asl = Al * pv;
+      vec Asl = A.cols(subview_col_ids) * vk(indvk);
       mat M2 = Asl * Asl.t();
       V += par2 * M2;
     }
   }
   V.diag() += 1;
+  V += A * diagmat(DD) * A.t();
 }
 
 bool mat2_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,

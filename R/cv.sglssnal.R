@@ -9,16 +9,20 @@
 #' @param stoptolcv Tolerance for convergence in cross-validation folds.
 #'   May be set to a smaller value than `stoptol` for faster convergence.
 #'   Default is `1e-4`.
+#' @param quietall Suppress all messages.
 #' @param ... Additional arguments passed to [sglssnal()].
 #' @export
 cv.sglssnal <- function(
     A, b, grp_vec, grp_idx, lambdas, alphas,
     nfolds = 5, foldid = NULL, printyes = TRUE,
-    stoptol = 1e-6, stoptolcv = 1e-4, ...) {
+    stoptol = 1e-6, stoptolcv = 1e-4, quietall = FALSE, ...) {
   nlambda <- length(lambdas)
   nalpha <- length(alphas)
   n <- length(b)
   p <- ncol(A)
+  if (quietall) {
+    printyes <- FALSE
+  }
   stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
   if (!is.null(foldid)) {
     stopifnot(
@@ -44,7 +48,9 @@ cv.sglssnal <- function(
     nfolds <- max(foldid)
   }
 
-  message("Cross-validation with ", nfolds, " folds")
+  if (!quietall) {
+    message("Cross-validation with ", nfolds, " folds")
+  }
   tstart <- Sys.time()
   for (t in 1:nfolds) {
     tstart_fold <- Sys.time()
@@ -82,27 +88,33 @@ cv.sglssnal <- function(
         cv_err[i, k] <- cv_err[i, k] + sum(res^2)
       }
     }
+    if (!quietall) {
+      message(
+        sprintf(
+          "Fold %d - %3.2fs", t,
+          as.numeric(difftime(Sys.time(), tstart_fold, units = "secs"))
+        )
+      )
+    }
+  }
+  if (!quietall) {
     message(
       sprintf(
-        "Fold %d - %3.2fs", t,
-        as.numeric(difftime(Sys.time(), tstart_fold, units = "secs"))
+        "Total time: %3.2fs",
+        as.numeric(difftime(Sys.time(), tstart, units = "secs"))
       )
     )
   }
-  message(
-    sprintf(
-      "Total time: %3.2fs",
-      as.numeric(difftime(Sys.time(), tstart, units = "secs"))
-    )
-  )
 
   min_error <- which(cv_err == min(cv_err), arr.ind = TRUE)
   min_lambda_id <- min_error[1, 1]
   min_alpha_id <- min_error[1, 2]
-  message(sprintf(
-    "Minimum error at (lambda, alpha) index (%d, %d)",
-    min_lambda_id, min_alpha_id
-  ))
+  if (!quietall) {
+    message(sprintf(
+      "Minimum error at (lambda, alpha) index (%d, %d)",
+      min_lambda_id, min_alpha_id
+    ))
+  }
 
   result <- sglssnal(
     A, b, grp_vec, grp_idx, lambdas[min_lambda_id], alphas[min_alpha_id],
