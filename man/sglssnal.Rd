@@ -17,6 +17,7 @@ sglssnal(
   printyes = TRUE,
   printsub = FALSE,
   maxit = 5000L,
+  Lip = NULL,
   y0 = NULL,
   z0 = NULL,
   x0 = NULL
@@ -57,6 +58,9 @@ Default is a vector of ones, indicating no weighting.}
 \item{printsub}{Print progress in subproblem. Default is \code{FALSE}.}
 
 \item{maxit}{Maximum number of iterations. Default is \code{5000L}.}
+
+\item{Lip}{Lipschitz constant for the step size.
+Automatically computed as the maximum eigenvalue of AA' if \code{NULL}.}
 
 \item{y0}{optional initialization vector}
 

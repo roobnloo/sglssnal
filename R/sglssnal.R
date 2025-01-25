@@ -24,6 +24,8 @@
 #' @param printyes Print progress in main loop. Default is `TRUE`.
 #' @param printsub Print progress in subproblem. Default is `FALSE`.
 #' @param maxit Maximum number of iterations. Default is `5000L`.
+#' @param Lip Lipschitz constant for the step size.
+#'   Automatically computed as the maximum eigenvalue of AA' if `NULL`.
 #' @param y0 optional initialization vector
 #' @param z0 optional initialization vector
 #' @param x0 optional initialization vector
@@ -44,7 +46,7 @@
 sglssnal <- function(
     A, b, grp_vec, grp_idx, lambda, alpha,
     pfgroup = rep(1, ncol(grp_idx)), stoptol = 1e-6, stopopt = 2L,
-    printyes = TRUE, printsub = FALSE, maxit = 5000L,
+    printyes = TRUE, printsub = FALSE, maxit = 5000L, Lip = NULL,
     y0 = NULL, z0 = NULL, x0 = NULL) {
   stopifnot("lambda must be nonnegative" = lambda >= 0)
   stopifnot("alpha must be in [0, 1]" = alpha >= 0 & alpha <= 1)
@@ -61,17 +63,19 @@ sglssnal <- function(
   n <- length(b)
   p <- ncol(A)
 
-  eigsopt <- list(issym = TRUE)
-  tstartLip <- Sys.time()
-  Lip <- RSpectra::eigs(
-    tcrossprod(A),
-    k = 1, which = "LA", opts = eigsopt, n = n
-  )$values
-  if (printyes) {
-    message(sprintf(
-      "\n Lip = %3.2e, time = %3.2f",
-      Lip, as.numeric(difftime(Sys.time(), tstartLip, units = "secs"))
-    ))
+  if (is.null(Lip)) {
+    eigsopt <- list(issym = TRUE)
+    tstartLip <- Sys.time()
+    Lip <- RSpectra::eigs(
+      tcrossprod(A),
+      k = 1, which = "LA", opts = eigsopt, n = n
+    )$values
+    if (printyes) {
+      message(sprintf(
+        "\n Lip = %3.2e, time = %3.2f",
+        Lip, as.numeric(difftime(Sys.time(), tstartLip, units = "secs"))
+      ))
+    }
   }
 
   y <- rep(0, n)

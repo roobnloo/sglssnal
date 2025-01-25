@@ -6,11 +6,15 @@
 #'   Ignored if `foldid` is provided.
 #' @param foldid Vector of integers specifying the fold for each observation.
 #'   If `NULL`, a default assignment is used.
+#' @param stoptolcv Tolerance for convergence in cross-validation folds.
+#'   May be set to a smaller value than `stoptol` for faster convergence.
+#'   Default is `1e-4`.
 #' @param ... Additional arguments passed to [sglssnal()].
 #' @export
 cv.sglssnal <- function(
     A, b, grp_vec, grp_idx, lambdas, alphas,
-    nfolds = 5, foldid = NULL, printyes = TRUE, ...) {
+    nfolds = 5, foldid = NULL, printyes = TRUE,
+    stoptol = 1e-6, stoptolcv = 1e-4, ...) {
   nlambda <- length(lambdas)
   nalpha <- length(alphas)
   n <- length(b)
@@ -25,6 +29,7 @@ cv.sglssnal <- function(
         all(foldid >= 1) && all(diff(sort(unique(foldid))) == 1)
     )
   }
+  A <- Matrix::Matrix(A, sparse = TRUE)
 
   cv_err <- matrix(0, nlambda, nalpha)
 
@@ -50,6 +55,12 @@ cv.sglssnal <- function(
     Atest <- A[foldidx2, , drop = FALSE]
     btest <- b[foldidx2]
 
+    eigsopt <- list(issym = TRUE)
+    Lip <- RSpectra::eigs(
+      tcrossprod(Atrain),
+      k = 1, which = "LA", opts = eigsopt, n = n
+    )$values
+
     for (k in 1:nalpha) {
       y0 <- rep(0, length(btrain))
       z0 <- rep(0, p)
@@ -60,7 +71,9 @@ cv.sglssnal <- function(
         alpha <- alphas[k]
         result <- sglssnal(
           Atrain, btrain, grp_vec, grp_idx, lambda, alpha,
-          y0 = y0, z0 = z0, x0 = x0, printyes = FALSE, ...
+          Lip = Lip, y0 = y0, z0 = z0, x0 = x0, printyes = FALSE,
+          stoptol = stoptolcv,
+          ...
         )
         y0 <- result$y
         z0 <- result$z
@@ -93,7 +106,7 @@ cv.sglssnal <- function(
 
   result <- sglssnal(
     A, b, grp_vec, grp_idx, lambdas[min_lambda_id], alphas[min_alpha_id],
-    printyes = printyes, ...
+    printyes = printyes, stoptol = stoptol, ...
   )
 
   cv_info <- list(

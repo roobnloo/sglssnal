@@ -14,6 +14,8 @@ cv.sglssnal(
   nfolds = 5,
   foldid = NULL,
   printyes = TRUE,
+  stoptol = 1e-06,
+  stoptolcv = 1e-04,
   ...
 )
 }
@@ -42,6 +44,12 @@ Ignored if \code{foldid} is provided.}
 If \code{NULL}, a default assignment is used.}
 
 \item{printyes}{Print progress in main loop. Default is \code{TRUE}.}
+
+\item{stoptol}{Tolerance for stopping criteria. Default is \code{1e-6}.}
+
+\item{stoptolcv}{Tolerance for convergence in cross-validation folds.
+May be set to a smaller value than \code{stoptol} for faster convergence.
+Default is \code{1e-4}.}
 
 \item{...}{Additional arguments passed to \code{\link[=sglssnal]{sglssnal()}}.}
 }
