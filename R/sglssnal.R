@@ -142,7 +142,9 @@ sglssnal <- function(
     message(sprintf(" nnz         : %d", runhist_main$nnz))
   }
 
-  return(list(
+  fit <- list(
     obj = obj, x = x, y = y, z = z, info = info
-  ))
+  )
+  class(fit) <- "sglssnal"
+  return(fit)
 }

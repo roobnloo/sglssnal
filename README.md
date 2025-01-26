@@ -4,12 +4,12 @@
 
 This R package solves the sparse-group lasso problem using second-order information via the Semismooth Newton Augmented Lagrangian method from [Zhang et al. (2020)](https://link.springer.com/article/10.1007/s10107-018-1329-6).
 
-For a vector $x$ split up into $g$ (possibly overlapping) groups and nonnegative weights $\{w_i\}$, define the penalty function 
+For a vector $x$ split up into $g$ (possibly overlapping) groups and nonnegative weights $\{w_i\}$, define the penalty function
 
 ```math
 \Phi(x) = \lambda_1\lVert x \rVert_1 + \lambda_2\sum_{i=1}^g w_i \lVert x_{(i)} \rVert_2.
 ```
-The sparse-group problem has the form
+The sparse-group lasso problem has the form
 ```math
 \text{min}_x\ \frac{1}{2} \lVert Ax - b\rVert_2^2 + \Phi(x) \qquad \text{(P)}
 ```
@@ -46,9 +46,9 @@ A <- Matrix::Matrix(rnorm(n * p), nrow = n, sparse = TRUE)
 ystar <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
 
 grp <- 1:p
-ind <- matrix(c(1, 20, 1, 21, 100, 1, 101, 200, 1), nrow = 3)
+ind <- matrix(c(1, 20, 21, 100, 101, 200), nrow = 2)
 
-result <- sglssnal::sglssnal(A, ystar, 0.1, 0.1, grp, ind)
+result <- sglssnal::sglssnal(A, ystar, grp, ind, 2, 0.5)
 print(result$info)
-print(result$x)
+print(coef(result))
 ```
