@@ -30,24 +30,22 @@ void mat_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,
     vec vk = gs.get_group_subview(prox1u, k);
     double cw = lam2 * gs.ind(2, k);
 
-    double par1 = sig * cw / grp_norms(k);
-    double par2 = par1 / (grp_norms(k) * grp_norms(k));
-
-    // sp_mat Al = gs.get_group_subview(A, k);
     uvec subview_col_ids = gs.elem_ids.subvec(gs.ind(0, k), gs.ind(1, k));
     uvec indvk = find(vk);
     subview_col_ids = subview_col_ids(indvk);
-
+    double par1 = sig * cw / grp_norms(k);
     DD(subview_col_ids) += sig - par1;
 
     if (any(abs(vk) > datum::eps)) {
       vec Asl = A.cols(subview_col_ids) * vk(indvk);
       mat M2 = Asl * Asl.t();
-      V += par2 * M2;
+      V += par1 / (grp_norms(k) * grp_norms(k)) * M2;
     }
   }
   V.diag() += 1;
-  V += A * diagmat(DD) * A.t();
+  uvec indDD = find(DD);
+  sp_mat A_dd = A.cols(indDD);
+  V += A_dd * diagmat(DD(indDD)) * A_dd.t();
 }
 
 bool mat2_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,

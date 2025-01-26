@@ -148,8 +148,9 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
   for (int itersub = 1; itersub <= maxitersub; ++itersub) {
     Ax = A * x;
     arma::vec Grad = -y - b + Ax;
-    double normGrad = norm(Grad, 2) / normb;
-    double priminf_sub = normGrad;
+    double normGrad = norm(Grad, 2);
+    double normGrad_b = normGrad / normb;
+    double &priminf_sub = normGrad_b;
     arma::vec Rd = Aty + z;
     double normRd = norm(Rd, 2);
     double dualinf_sub = normRd / (1 + norm(z, 2));
@@ -167,18 +168,18 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
                   << priminf_sub << "   " << dualinf_sub << " " << tolconst;
     }
 
-    if (normGrad < tolsub && itersub > 1) {
+    if (normGrad_b < tolsub && itersub > 1) {
       if (printsub) {
         Rcpp::Rcout << "\n       good termination in subproblem: "
                     << " dualinfes = " << dualinf_sub
-                    << ", normGrad = " << normGrad << ", tolsub = " << tolsub
+                    << ", normGrad = " << normGrad_b << ", tolsub = " << tolsub
                     << std::endl;
       }
       breakyes = -1;
       break;
     }
 
-    par["epsilon"] = std::min(1e-3, 0.1 * normGrad);
+    par["epsilon"] = std::min(1e-3, 0.1 * normGrad_b);
     par["precond"] = precond;
     if (precond == 1) {
       par["invdiagM"] = 1 / (1 + sig);
@@ -199,8 +200,8 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
     double dual_ratio =
         (itersub > 1) ? dualinf_sub / dualinf_vec[itersub - 2] : 0;
 
-    arma::vec rhs = Grad;
-    double tolpsqmr = std::min(5e-3, 0.001 * norm(rhs, 2));
+    arma::vec &rhs = Grad;
+    double tolpsqmr = std::min(5e-3, 0.001 * normGrad);
     double const2 = 1;
     if (itersub > 1 &&
         (prim_ratio > 0.5 || priminf_sub > 0.1 * priminf_vec[0])) {
