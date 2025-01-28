@@ -9,8 +9,10 @@ cv.sglssnal(
   b,
   grp_vec,
   grp_idx,
-  lambdas,
-  alphas,
+  alphas = 0.75,
+  lambdas = NULL,
+  nlambda = 100,
+  lambda.min.ratio = 0.01,
   nfolds = 5,
   foldid = NULL,
   printyes = TRUE,
@@ -34,9 +36,16 @@ If there are \eqn{g} groups and \code{G_i} contains the indices of the
 \code{grp_vec[grp_idx[1, i]:grp_idx[2, i]]} are the indices of the \code{i}-th
 group.}
 
-\item{lambdas}{Vector of lambda parameters to tune.}
+\item{alphas}{Vector of alpha parameters to tune. Default is \code{0.75}.}
 
-\item{alphas}{Vector of alpha parameters to tune.}
+\item{lambdas}{Vector of lambda parameters to tune. If \code{NULL}, a
+path is automatically generated based on \code{norm(t(A) \%*\% b, "I")} and
+\code{lambda.min.ratio}. If supplied, \code{nlambda} and \code{lambda.min.ratio} are ignored.
+The values are sorted in decreasing order.}
+
+\item{nlambda}{Number of lambda values to use.}
+
+\item{lambda.min.ratio}{Minimum ratio of the smallest to largest lambda.}
 
 \item{nfolds}{Number of folds for cross-validation.
 Ignored if \code{foldid} is provided.}
@@ -56,6 +65,20 @@ Default is \code{1e-4}.}
 
 \item{...}{Additional arguments passed to \code{\link[=sglssnal]{sglssnal()}}.}
 }
+\value{
+List of class \verb{cv.sglssanl, sglssnal}, containing the following components:
+\itemize{
+\item \code{obj}: Vector containing primal and dual objective values at the solution.
+\item \code{x}: The primal variable of interest.
+\item \code{y}: The y dual variable.
+\item \code{z}: The z dual variable.
+\item \code{info}: List containing information about the optimization process such as
+relative gap, iteration number, and run time.
+\item \code{cv_info}: List containing the tuning grid, cross-validation errors, and
+the inidices of the optimal lambda and alpha.
+}
+}
 \description{
-Cross-validation for sglssnal
+Perform cross-validation for the sglssnal algorithm over
+a grid of lambda and alpha values.
 }

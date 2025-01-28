@@ -123,7 +123,7 @@ List conjgrad_linsolver(const arma::sp_mat &A, const arma::vec &rhs,
     arma::mat V;
     arma::vec proj2pv, prox1u;
     mat_ssn(u, A, lam1, lam2, gs, sig, V, proj2pv, prox1u);
-    dy = solve(V, rhs);
+    dy = solve(V, rhs, solve_opts::likely_sympd);
     solve_ok = 1;
   }
 
@@ -133,7 +133,7 @@ List conjgrad_linsolver(const arma::sp_mat &A, const arma::vec &rhs,
     uint sp_dim;
     if (mat2_ssn(u, A, lam1, lam2, gs, sig, V2, D, sp_dim)) {
       arma::vec rhstmp = D.t() * rhs;
-      dy = solve(V2, rhstmp);
+      dy = solve(V2, rhstmp, solve_opts::likely_sympd);
       dy = D * dy;
       dy = rhs - dy;
     } else {

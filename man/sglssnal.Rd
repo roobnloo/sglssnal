@@ -45,7 +45,7 @@ is the group \eqn{\ell_2} penalty.}
 group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}.}
 
 \item{pfgroup}{Penalty factor for each group in the group lasso.
-Default is a vector of ones, indicating no weighting.}
+Default is a vector of ones, indicating no weighting for any group.}
 
 \item{stoptol}{Tolerance for stopping criteria. Default is \code{1e-6}.}
 
@@ -62,14 +62,14 @@ Default is a vector of ones, indicating no weighting.}
 \item{Lip}{Lipschitz constant for the step size.
 Automatically computed as the maximum eigenvalue of AA' if \code{NULL}.}
 
-\item{y0}{optional initialization vector}
+\item{y0}{optional initialization vector for dual variable \code{y}}
 
-\item{z0}{optional initialization vector}
+\item{z0}{optional initialization vector for dual variable \code{z}}
 
-\item{x0}{optional initialization vector}
+\item{x0}{optional initialization vector for primal variable \code{x}}
 }
 \value{
-List containing the following components:
+List of class \code{sglssnal} containing the following components:
 \itemize{
 \item \code{obj}: Vector containing primal and dual objective values at the solution.
 \item \code{x}: The primal variable of interest.
@@ -82,6 +82,15 @@ relative gap, iteration number, and run time.
 \description{
 Fits a sparse-group lasso model using
 second-order information to solve the dual problem.
+The penalty function is given by
+\deqn{\Phi(x) = \lambda_1 ||x||_1 + \lambda_2 \sum_{i=1}^g w_i ||x_{G_i}||_2}
+where \eqn{G_i} is the \eqn{i}-th group and \eqn{w_i} its penalty factor.
+The primal problem is given by
+\deqn{\min_{x \in \mathbb{R}^p}\; \frac{1}{2} ||Ax - b||_2^2 + \Phi(x)}
+while the dual problem has the form
+\deqn{\max_{y \in \mathbb{R}^n, z \in \mathbb{R}^p}\; -\langle b, y\rangle - \frac{1}{2}||y||_2^2 - \Phi^\ast(z) \text{s.t.} A^\top y + z = 0}
+where \eqn{\Phi^\ast(z)} denotes the Fenchel conjugate of \eqn{\Phi}.
+The algorithm is based on the work of Zhang et al. (2020).
 }
 \references{
 Zhang, Y., Zhang, N., Sun, D., & Toh, K. C. (2020).

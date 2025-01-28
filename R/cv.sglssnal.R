@@ -1,7 +1,14 @@
 #' Cross-validation for sglssnal
+#' @description Perform cross-validation for the sglssnal algorithm over
+#'   a grid of lambda and alpha values.
 #' @inheritParams sglssnal
-#' @param lambdas Vector of lambda parameters to tune.
-#' @param alphas Vector of alpha parameters to tune.
+#' @param alphas Vector of alpha parameters to tune. Default is `0.75`.
+#' @param lambdas Vector of lambda parameters to tune. If `NULL`, a
+#'   path is automatically generated based on `norm(t(A) %*% b, "I")` and
+#'   `lambda.min.ratio`. If supplied, `nlambda` and `lambda.min.ratio` are ignored.
+#'   The values are sorted in decreasing order.
+#' @param nlambda Number of lambda values to use.
+#' @param lambda.min.ratio Minimum ratio of the smallest to largest lambda.
 #' @param nfolds Number of folds for cross-validation.
 #'   Ignored if `foldid` is provided.
 #' @param foldid Vector of integers specifying the fold for each observation.
@@ -11,12 +18,21 @@
 #'   Default is `1e-4`.
 #' @param quietall Suppress all messages.
 #' @param ... Additional arguments passed to [sglssnal()].
+#' @return List of class `cv.sglssanl, sglssnal`, containing the following components:
+#' * `obj`: Vector containing primal and dual objective values at the solution.
+#' * `x`: The primal variable of interest.
+#' * `y`: The y dual variable.
+#' * `z`: The z dual variable.
+#' * `info`: List containing information about the optimization process such as
+#'   relative gap, iteration number, and run time.
+#' * `cv_info`: List containing the tuning grid, cross-validation errors, and
+#'   the inidices of the optimal lambda and alpha.
 #' @export
 cv.sglssnal <- function(
-    A, b, grp_vec, grp_idx, lambdas, alphas,
+    A, b, grp_vec, grp_idx, alphas = 0.75, lambdas = NULL,
+    nlambda = 100, lambda.min.ratio = 1e-2,
     nfolds = 5, foldid = NULL, printyes = TRUE,
     stoptol = 1e-6, stoptolcv = 1e-4, quietall = FALSE, ...) {
-  nlambda <- length(lambdas)
   nalpha <- length(alphas)
   n <- length(b)
   p <- ncol(A)
@@ -33,6 +49,17 @@ cv.sglssnal <- function(
         all(foldid >= 1) && all(diff(sort(unique(foldid))) == 1)
     )
   }
+  if (is.null(lambdas)) {
+    if (nlambda < 0) {
+      stop("nlambda must be a positive integer")
+    }
+    lam_max <- norm(crossprod(A, b), "I")
+    lambdas <- lam_max *
+      exp(seq(log(1), log(lambda.min.ratio), length.out = nlambda))
+  } else {
+    lambdas <- sort(lambdas, decreasing = TRUE)
+    nlambda <- length(lambdas)
+  }
   A <- Matrix::Matrix(A, sparse = TRUE)
 
   cv_err <- matrix(0, nlambda, nalpha)
@@ -44,12 +71,18 @@ cv.sglssnal <- function(
   } else {
     stopifnot("foldid must be a vector of integers" = is.integer(foldid))
     stopifnot("length(foldid) must equal nrow(A)" = length(foldid) == nrow(A))
-    stopifnot()
+    stopifnot(
+      "foldid must be a contiguous vector starting from 1" =
+        all(foldid >= 1) && all(diff(sort(unique(foldid))) == 1)
+    )
     nfolds <- max(foldid)
   }
 
   if (!quietall) {
-    message("Cross-validation with ", nfolds, " folds")
+    message(sprintf(
+      "Cross-validating sglssnal over a (%dx%d) grid with %d folds...",
+      nlambda, nalpha, nfolds
+    ))
   }
   tstart <- Sys.time()
   for (t in 1:nfolds) {
@@ -61,7 +94,7 @@ cv.sglssnal <- function(
     Atest <- A[foldidx2, , drop = FALSE]
     btest <- b[foldidx2]
 
-    eigsopt <- list(issym = TRUE)
+    eigsopt <- list(retvec = FALSE)
     Lip <- RSpectra::eigs(
       tcrossprod(Atrain),
       k = 1, which = "LA", opts = eigsopt, n = n
@@ -122,9 +155,12 @@ cv.sglssnal <- function(
   )
 
   cv_info <- list(
+    alphas = alphas,
+    lambdas = lambdas,
     cvm = cv_err,
     cv_idx = c("cv_lambda_id" = min_lambda_id, "cv_alpha_id" = min_alpha_id)
   )
   result$cv_info <- cv_info
+  class(result) <- c("cv.sglssnal", "sglssnal")
   return(result)
 }

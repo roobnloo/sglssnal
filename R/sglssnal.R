@@ -1,6 +1,15 @@
 #' Run Sparse-Group Lasso via Semismooth Newton Augmented Lagrangian
 #' @description Fits a sparse-group lasso model using
 #'   second-order information to solve the dual problem.
+#'   The penalty function is given by
+#'   \deqn{\Phi(x) = \lambda_1 ||x||_1 + \lambda_2 \sum_{i=1}^g w_i ||x_{G_i}||_2}
+#'   where \eqn{G_i} is the \eqn{i}-th group and \eqn{w_i} its penalty factor.
+#'   The primal problem is given by
+#'   \deqn{\min_{x \in \mathbb{R}^p}\; \frac{1}{2} ||Ax - b||_2^2 + \Phi(x)}
+#'   while the dual problem has the form
+#'   \deqn{\max_{y \in \mathbb{R}^n, z \in \mathbb{R}^p}\; -\langle b, y\rangle - \frac{1}{2}||y||_2^2 - \Phi^\ast(z) \text{s.t.} A^\top y + z = 0}
+#'   where \eqn{\Phi^\ast(z)} denotes the Fenchel conjugate of \eqn{\Phi}.
+#'   The algorithm is based on the work of Zhang et al. (2020).
 #' @param A \eqn{n \times p} design matrix.
 #' @param b \eqn{n} response vector.
 #' @param grp_vec Vector of indicies of variables in each group.
@@ -16,7 +25,7 @@
 #' @param alpha Determines the relative weight of the \eqn{\ell_1} and
 #'   group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}.
 #' @param pfgroup Penalty factor for each group in the group lasso.
-#'   Default is a vector of ones, indicating no weighting.
+#'   Default is a vector of ones, indicating no weighting for any group.
 #' @param stoptol Tolerance for stopping criteria. Default is `1e-6`.
 #' @param stopopt Stopping criteria. 1: relative duality gap and feasibility,
 #'   2: KKT conditions, 3: dual feasibility and relative duality gap,
@@ -26,10 +35,10 @@
 #' @param maxit Maximum number of iterations. Default is `5000L`.
 #' @param Lip Lipschitz constant for the step size.
 #'   Automatically computed as the maximum eigenvalue of AA' if `NULL`.
-#' @param y0 optional initialization vector
-#' @param z0 optional initialization vector
-#' @param x0 optional initialization vector
-#' @return List containing the following components:
+#' @param y0 optional initialization vector for dual variable `y`
+#' @param z0 optional initialization vector for dual variable `z`
+#' @param x0 optional initialization vector for primal variable `x`
+#' @return List of class `sglssnal` containing the following components:
 #' * `obj`: Vector containing primal and dual objective values at the solution.
 #' * `x`: The primal variable of interest.
 #' * `y`: The y dual variable.
@@ -48,7 +57,7 @@ sglssnal <- function(
     pfgroup = rep(1, ncol(grp_idx)), stoptol = 1e-6, stopopt = 2L,
     printyes = TRUE, printsub = FALSE, maxit = 5000L, Lip = NULL,
     y0 = NULL, z0 = NULL, x0 = NULL) {
-  stopifnot("lambda must be nonnegative" = lambda >= 0)
+  stopifnot("lambda must be positive" = lambda > 0)
   stopifnot("alpha must be in [0, 1]" = alpha >= 0 & alpha <= 1)
   stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
   stopifnot("length(pfgroup) must be equal to ncol(grp_idx)" = length(pfgroup) == ncol(grp_idx))
@@ -64,7 +73,7 @@ sglssnal <- function(
   p <- ncol(A)
 
   if (is.null(Lip)) {
-    eigsopt <- list(issym = TRUE)
+    eigsopt <- list(retvec = FALSE)
     tstartLip <- Sys.time()
     Lip <- RSpectra::eigs(
       tcrossprod(A),
@@ -82,9 +91,16 @@ sglssnal <- function(
   z <- rep(0, p)
   x <- z
   if (!is.null(y0) && !is.null(z0) && !is.null(x0)) {
-    y <- y0
-    z <- z0
-    x <- x0
+    if (length(y0) == n && length(z0) == p && length(x0) == p) {
+      y <- y0
+      z <- z0
+      x <- x0
+    } else {
+      stop(sprintf(
+        "y0, z0, and x0 must have dimensions &d, &d, and &d respectively.",
+        n, p, p
+      ))
+    }
   }
 
   parmain <- list(
