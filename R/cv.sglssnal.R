@@ -139,7 +139,7 @@ cv.sglssnal <- function(
     )
   }
 
-  min_error <- which(cv_err == min(cv_err), arr.ind = TRUE)
+  min_error <- which(cv_err == min(cv_err), arr.ind = TRUE, useNames = FALSE)
   min_lambda_id <- min_error[1, 1]
   min_alpha_id <- min_error[1, 2]
   if (!quietall) {
