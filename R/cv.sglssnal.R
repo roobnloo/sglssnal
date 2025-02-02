@@ -95,10 +95,18 @@ cv.sglssnal <- function(
     btest <- b[foldidx2]
 
     eigsopt <- list(retvec = FALSE)
-    Lip <- RSpectra::eigs(
-      tcrossprod(Atrain),
-      k = 1, which = "LA", opts = eigsopt, n = n
-    )$values
+    Lip <- NULL
+    if (getRversion() < as.numeric_version("4.4.0")) {
+      Lip <- RSpectra::eigs(
+        tcrossprod(as.matrix(Atrain)),
+        k = 1, opts = eigsopt, n = n
+      )$values
+    } else {
+      Lip <- RSpectra::eigs(
+        tcrossprod(Atrain),
+        k = 1, which = "LA", opts = eigsopt, n = n
+      )$values
+    }
 
     for (k in 1:nalpha) {
       y0 <- rep(0, length(btrain))

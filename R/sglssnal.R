@@ -75,10 +75,18 @@ sglssnal <- function(
   if (is.null(Lip)) {
     eigsopt <- list(retvec = FALSE)
     tstartLip <- Sys.time()
-    Lip <- RSpectra::eigs(
-      tcrossprod(A),
-      k = 1, which = "LA", opts = eigsopt, n = n
-    )$values
+    Lip <- NULL
+    if (getRversion() < as.numeric_version("4.4.0")) {
+      Lip <- RSpectra::eigs(
+        tcrossprod(as.matrix(A)),
+        k = 1, opts = eigsopt, n = n
+      )$values
+    } else {
+      Lip <- RSpectra::eigs(
+        tcrossprod(A),
+        k = 1, which = "LA", opts = eigsopt, n = n
+      )$values
+    }
     if (printyes) {
       message(sprintf(
         "\n Lip = %3.2e, time = %3.2f",
