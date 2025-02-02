@@ -129,6 +129,7 @@ sglssnal <- function(
   y <- result$y
   z <- result$z
   x <- result$x
+  x[abs(x) <= .Machine$double.eps] <- 0 # hard threshold for numerical stability
   info_main <- result$info
   runhist_main <- result$runhist
 
