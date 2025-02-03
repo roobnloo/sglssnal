@@ -5,10 +5,10 @@
 #' @param alphas Vector of alpha parameters to tune. Default is `0.75`.
 #' @param lambdas Vector of lambda parameters to tune. If `NULL`, a
 #'   path is automatically generated based on `norm(t(A) %*% b, "I")` and
-#'   `lambda.min.ratio`. If supplied, `nlambda` and `lambda.min.ratio` are ignored.
+#'   `lambda_min_ratio`. If supplied, `nlambda` and `lambda_min_ratio` are ignored_
 #'   The values are sorted in decreasing order.
 #' @param nlambda Number of lambda values to use.
-#' @param lambda.min.ratio Minimum ratio of the smallest to largest lambda.
+#' @param lambda_min_ratio Minimum ratio of the smallest to largest lambda.
 #' @param nfolds Number of folds for cross-validation.
 #'   Ignored if `foldid` is provided.
 #' @param foldid Vector of integers specifying the fold for each observation.
@@ -30,7 +30,7 @@
 #' @export
 cv.sglssnal <- function(
     A, b, grp_vec, grp_idx, alphas = 0.75, lambdas = NULL,
-    nlambda = 100, lambda.min.ratio = 1e-2,
+    nlambda = 100, lambda_min_ratio = 1e-3,
     nfolds = 5, foldid = NULL, printyes = TRUE,
     stoptol = 1e-6, stoptolcv = 1e-4, quietall = FALSE, ...) {
   nalpha <- length(alphas)
@@ -53,9 +53,14 @@ cv.sglssnal <- function(
     if (nlambda < 0) {
       stop("nlambda must be a positive integer")
     }
-    lam_max <- norm(crossprod(A, b), "I")
+    alpha_min <- min(alphas)
+    if (alpha_min == 0) {
+      alpha_min <- 1e-2
+    }
+    # This choice of lam_max ensures a sparse lasso solution exists on the path across all alphas.
+    lam_max <- norm(crossprod(A, b), "I") / alpha_min
     lambdas <- lam_max *
-      exp(seq(log(1), log(lambda.min.ratio), length.out = nlambda))
+      exp(seq(log(1), log(lambda_min_ratio), length.out = nlambda))
   } else {
     lambdas <- sort(lambdas, decreasing = TRUE)
     nlambda <- length(lambdas)

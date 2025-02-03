@@ -12,7 +12,7 @@ cv.sglssnal(
   alphas = 0.75,
   lambdas = NULL,
   nlambda = 100,
-  lambda.min.ratio = 0.01,
+  lambda_min_ratio = 0.001,
   nfolds = 5,
   foldid = NULL,
   printyes = TRUE,
@@ -40,12 +40,12 @@ group.}
 
 \item{lambdas}{Vector of lambda parameters to tune. If \code{NULL}, a
 path is automatically generated based on \code{norm(t(A) \%*\% b, "I")} and
-\code{lambda.min.ratio}. If supplied, \code{nlambda} and \code{lambda.min.ratio} are ignored.
+\code{lambda_min_ratio}. If supplied, \code{nlambda} and \code{lambda_min_ratio} are ignored_
 The values are sorted in decreasing order.}
 
 \item{nlambda}{Number of lambda values to use.}
 
-\item{lambda.min.ratio}{Minimum ratio of the smallest to largest lambda.}
+\item{lambda_min_ratio}{Minimum ratio of the smallest to largest lambda.}
 
 \item{nfolds}{Number of folds for cross-validation.
 Ignored if \code{foldid} is provided.}

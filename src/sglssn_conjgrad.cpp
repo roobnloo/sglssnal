@@ -38,7 +38,7 @@ List findstep_impl(const arma::vec &b, double sig, double psi_y0,
   }
 
   double alp = 1, alpconst = 0.5, LB = 0, UB = 1, psi_y = psi_y0;
-  double gLB, gUB;
+  double gLB = LB, gUB = UB;
   vec u = u0, Prox_u = Prox_u0, sigProx_u = sigProx_u0, z = z0, y = y0,
       Aty = Aty0;
 
