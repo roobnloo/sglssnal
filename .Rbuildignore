@@ -5,3 +5,6 @@
 ^LICENSE\.md$
 ^README\.md$
 ^compile_flags.txt$
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.DS_Store$

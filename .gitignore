@@ -4,4 +4,6 @@
 scratch/
 .vscode/
 compile_flags.txt
-*.code-workspace
+.Rproj.user
+*.Rproj
+.DS_Store*.code-workspace
