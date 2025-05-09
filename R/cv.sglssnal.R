@@ -49,6 +49,7 @@ cv.sglssnal <- function(
         all(foldid >= 1) && all(diff(sort(unique(foldid))) == 1)
     )
   }
+
   if (is.null(lambdas)) {
     if (nlambda < 0) {
       stop("nlambda must be a positive integer")
@@ -130,8 +131,8 @@ cv.sglssnal <- function(
         y0 <- result$y
         z0 <- result$z
         x0 <- result$x
-        res <- Atest %*% x0 - btest
-        cv_err[i, k] <- cv_err[i, k] + sum(res^2)
+        error <- btest - (result$x0 + Atest %*% result$x0)
+        cv_err[i, k] <- cv_err[i, k] + sum(error^2)
       }
     }
     if (!quietall) {

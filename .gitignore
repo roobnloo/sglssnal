@@ -7,3 +7,6 @@ compile_flags.txt
 .Rproj.user
 *.Rproj
 .DS_Store
+.lintr
+.RData
+.Rhistory
