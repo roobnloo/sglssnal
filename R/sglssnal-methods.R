@@ -14,5 +14,9 @@ coef.sglssnal <- function(object) {
 #' @method predict sglssnal
 #' @export
 predict.sglssnal <- function(object, newdata) {
-  newdata %*% stats::coef(object)
+  result <- newdata %*% object$x
+  if (object$intercept) {
+    result <- result + object$x0
+  }
+  return(result)
 }

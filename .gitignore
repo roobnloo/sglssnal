@@ -6,4 +6,8 @@ scratch/
 compile_flags.txt
 .Rproj.user
 *.Rproj
-.DS_Store*.code-workspace
+.DS_Store
+*.code-workspace
+.lintr
+.RData
+.Rhistory

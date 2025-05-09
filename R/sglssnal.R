@@ -26,6 +26,8 @@
 #'   group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}.
 #' @param pfgroup Penalty factor for each group in the group lasso.
 #'   Default is a vector of ones, indicating no weighting for any group.
+#' @param standardize
+#' @param intercept Centers mean function at 0 through \eqn{y - \bar{y}}
 #' @param stoptol Tolerance for stopping criteria. Default is `1e-6`.
 #' @param stopopt Stopping criteria. 1: relative duality gap and feasibility,
 #'   2: KKT conditions, 3: dual feasibility and relative duality gap,
@@ -54,7 +56,9 @@
 #' @export
 sglssnal <- function(
     A, b, grp_vec, grp_idx, lambda, alpha,
-    pfgroup = rep(1, ncol(grp_idx)), stoptol = 1e-6, stopopt = 2L,
+    pfgroup = rep(1, ncol(grp_idx)), intercept = TRUE,
+    standardize = TRUE,
+    stoptol = 1e-6, stopopt = 2L,
     printyes = TRUE, printsub = FALSE, maxit = 5000L, Lip = NULL,
     y0 = NULL, z0 = NULL, x0 = NULL) {
   stopifnot("lambda must be positive" = lambda > 0)
@@ -68,9 +72,17 @@ sglssnal <- function(
   lambda1 <- alpha * lambda
   lambda2 <- lambda * (1 - alpha)
 
-  A <- Matrix::Matrix(A, sparse = TRUE)
   n <- length(b)
   p <- ncol(A)
+  b_mean <- mean(b)
+  A_sd <- sqrt(Matrix::colSums(A^2) / n)
+  A_sd[A_sd < sqrt(.Machine$double.eps)] <- 1
+  if (intercept) {
+    b <- b - b_mean
+  }
+  if (standardize) {
+    A %*% Matrix::Diagonal(x = 1 / A_sd)
+  }
 
   if (is.null(Lip)) {
     eigsopt <- list(retvec = FALSE)
@@ -130,6 +142,13 @@ sglssnal <- function(
   z <- result$z
   x <- result$x
   x[abs(x) <= .Machine$double.eps] <- 0 # hard threshold for numerical stability
+  if (standardize) {
+    x <- x / A_sd
+  }
+  x0 <- 0
+  if (intercept) {
+    x0 <- b_mean
+  }
   info_main <- result$info
   runhist_main <- result$runhist
 
@@ -168,7 +187,7 @@ sglssnal <- function(
   }
 
   fit <- list(
-    obj = obj, x = x, y = y, z = z, info = info
+    obj = obj, x0 = x0, x = x, y = y, z = z, intercept = intercept, info = info
   )
   class(fit) <- "sglssnal"
   return(fit)
