@@ -28,7 +28,8 @@ int sigma_fun(int iter) {
   }
 }
 
-List sglssnal_main(const arma::sp_mat &A, const arma::vec &b, double lam1,
+template <typename MatType>
+List sglssnal_main(const MatType &A, const arma::vec &b, double lam1,
                    double lam2, const GroupStruct &gs, const List &parmain,
                    const arma::vec &y0, const arma::vec &z0,
                    const arma::vec &x0) {
@@ -274,6 +275,17 @@ List sglssnal_main(const arma::sp_mat &A, const arma::vec &b, double lam1,
                       Named("runhist") = runhist);
 }
 
+// Explicit instantiations
+template List sglssnal_main<sp_mat>(const sp_mat &A, const vec &b, double lam1,
+                                    double lam2, const GroupStruct &gs,
+                                    const List &parmain, const vec &y0,
+                                    const vec &z0, const vec &x0);
+
+template List sglssnal_main<mat>(const mat &A, const vec &b, double lam1,
+                                 double lam2, const GroupStruct &gs,
+                                 const List &parmain, const vec &y0,
+                                 const vec &z0, const vec &x0);
+
 // [[Rcpp::export]]
 List sglssnal_main_interface(const arma::sp_mat &A, const arma::vec &b,
                              double lam1, double lam2, const List &gs_list,
@@ -283,5 +295,20 @@ List sglssnal_main_interface(const arma::sp_mat &A, const arma::vec &b,
   mat ind = as<mat>(gs_list["ind"]);
   uint num_group = ind.n_cols;
   GroupStruct gs = {as<sp_mat>(gs_list["pma"]), G, ind, num_group};
+
+  return sglssnal_main(A, b, lam1, lam2, gs, parmain, y0, z0, x0);
+}
+
+// [[Rcpp::export]]
+List sglssnal_main_interface_dense(const arma::mat &A, const arma::vec &b,
+                                   double lam1, double lam2,
+                                   const List &gs_list, const List &parmain,
+                                   const arma::vec &y0, const arma::vec &z0,
+                                   const arma::vec &x0) {
+  uvec G = as<uvec>(gs_list["G"]);
+  mat ind = as<mat>(gs_list["ind"]);
+  uint num_group = ind.n_cols;
+  GroupStruct gs = {as<sp_mat>(gs_list["pma"]), G, ind, num_group};
+
   return sglssnal_main(A, b, lam1, lam2, gs, parmain, y0, z0, x0);
 }

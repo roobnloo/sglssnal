@@ -30,9 +30,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sglssnal_main_interface_dense
+List sglssnal_main_interface_dense(const arma::mat& A, const arma::vec& b, double lam1, double lam2, const List& gs_list, const List& parmain, const arma::vec& y0, const arma::vec& z0, const arma::vec& x0);
+RcppExport SEXP _sglssnal_sglssnal_main_interface_dense(SEXP ASEXP, SEXP bSEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP gs_listSEXP, SEXP parmainSEXP, SEXP y0SEXP, SEXP z0SEXP, SEXP x0SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< double >::type lam1(lam1SEXP);
+    Rcpp::traits::input_parameter< double >::type lam2(lam2SEXP);
+    Rcpp::traits::input_parameter< const List& >::type gs_list(gs_listSEXP);
+    Rcpp::traits::input_parameter< const List& >::type parmain(parmainSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y0(y0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type z0(z0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x0(x0SEXP);
+    rcpp_result_gen = Rcpp::wrap(sglssnal_main_interface_dense(A, b, lam1, lam2, gs_list, parmain, y0, z0, x0));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_sglssnal_sglssnal_main_interface", (DL_FUNC) &_sglssnal_sglssnal_main_interface, 9},
+    {"_sglssnal_sglssnal_main_interface_dense", (DL_FUNC) &_sglssnal_sglssnal_main_interface_dense, 9},
     {NULL, NULL, 0}
 };
 

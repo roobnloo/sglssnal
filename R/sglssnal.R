@@ -26,8 +26,10 @@
 #'   group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}.
 #' @param pfgroup Penalty factor for each group in the group lasso.
 #'   Default is a vector of ones, indicating no weighting for any group.
-#' @param standardize
-#' @param intercept Centers mean function at 0 through \eqn{y - \bar{y}}
+#' @param standardize Whether to standardize the columns of A to have unit norm.
+#'   Default is `TRUE`.
+#' @param intercept Centers mean function at 0 through \eqn{y - \bar{y}}.
+#'   Default is `TRUE`.
 #' @param stoptol Tolerance for stopping criteria. Default is `1e-6`.
 #' @param stopopt Stopping criteria. 1: relative duality gap and feasibility,
 #'   2: KKT conditions, 3: dual feasibility and relative duality gap,
@@ -57,8 +59,7 @@
 sglssnal <- function(
     A, b, grp_vec, grp_idx, lambda, alpha,
     pfgroup = rep(1, ncol(grp_idx)), intercept = TRUE,
-    standardize = TRUE,
-    stoptol = 1e-6, stopopt = 2L,
+    standardize = TRUE, stoptol = 1e-6, stopopt = 2L,
     printyes = TRUE, printsub = FALSE, maxit = 5000L, Lip = NULL,
     y0 = NULL, z0 = NULL, x0 = NULL) {
   stopifnot("lambda must be positive" = lambda > 0)
@@ -81,24 +82,33 @@ sglssnal <- function(
     b <- b - b_mean
   }
   if (standardize) {
-    A %*% Matrix::Diagonal(x = 1 / A_sd)
+    if (inherits(A, "sparseMatrix")) {
+      A <- A %*% Matrix::Diagonal(x = 1 / A_sd)
+    } else {
+      A <- sweep(A, 2, A_sd, "/")
+    }
   }
 
   if (is.null(Lip)) {
     eigsopt <- list(retvec = FALSE)
     tstartLip <- Sys.time()
-    Lip <- NULL
     if (getRversion() < as.numeric_version("4.4.0")) {
       Lip <- RSpectra::eigs(
         tcrossprod(as.matrix(A)),
         k = 1, opts = eigsopt, n = n
       )$values
-    } else {
+    } else if (inherits(A, "sparseMatrix")) {
       Lip <- RSpectra::eigs(
         tcrossprod(A),
         k = 1, which = "LA", opts = eigsopt, n = n
       )$values
+    } else {
+      Lip <- RSpectra::eigs(
+        tcrossprod(A),
+        k = 1, which = "LM", opts = eigsopt, n = n
+      )$values
     }
+
     if (printyes) {
       message(sprintf(
         "\n Lip = %3.2e, time = %3.2f",
@@ -135,9 +145,16 @@ sglssnal <- function(
   )
 
   gs <- group_structure(p, grp_vec, grp_idx, pfgroup)
-  result <- sglssnal_main_interface(
-    A, b, lambda1, lambda2, gs, parmain, y, z, x
-  )
+  result <- NULL
+  if (inherits(A, "sparseMatrix")) {
+    result <- sglssnal_main_interface(
+      A, b, lambda1, lambda2, gs, parmain, y, z, x
+    )
+  } else {
+    result <- sglssnal_main_interface_dense(
+      A, b, lambda1, lambda2, gs, parmain, y, z, x
+    )
+  }
   y <- result$y
   z <- result$z
   x <- result$x

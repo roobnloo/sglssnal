@@ -12,7 +12,9 @@ test_that("simple cv run", {
   grp <- 1:p
   ind <- matrix(c(1, 10, 11, 15, 16, 20), nrow = 2)
 
-  result <- sglssnal::cv.sglssnal(A, ystar, grp, ind, quietall = TRUE)
+  result <- sglssnal::cv.sglssnal(A, ystar, grp, ind,
+    quietall = TRUE, intercept = FALSE, standardize = FALSE
+  )
   obj <- round(result$obj, 3)
   expect_obj <- c(4.721, 4.721)
   names(expect_obj) <- c("primal objective", "dual objective")
@@ -40,7 +42,8 @@ test_that("run with custom grid", {
 
   result <- sglssnal::cv.sglssnal(
     A, ystar, grp, ind,
-    alphas = c(0.1, 0.5, 0.9), lambdas = c(1, 0.5, 0.25, 0.1), quietall = TRUE
+    alphas = c(0.1, 0.5, 0.9), lambdas = c(1, 0.5, 0.25, 0.1),
+    quietall = TRUE, intercept = FALSE, standardize = FALSE
   )
   obj <- round(result$obj, 3)
   expect_equal(obj, c("primal objective" = 5.977, "dual objective" = 5.977))
@@ -74,7 +77,8 @@ test_that("lam_max scales with alphas", {
 
   result_01 <- sglssnal::cv.sglssnal(
     A, ystar, grp, ind,
-    alphas = 0.1, quietall = TRUE
+    alphas = 0.1,
+    quietall = TRUE, intercept = FALSE, standardize = FALSE
   )
 
   lam_max01 <- result_01$cv_info$lambdas[1]
