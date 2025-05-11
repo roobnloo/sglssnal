@@ -5,3 +5,7 @@ sglssnal_main_interface <- function(A, b, lam1, lam2, gs_list, parmain, y0, z0, 
     .Call('_sglssnal_sglssnal_main_interface', PACKAGE = 'sglssnal', A, b, lam1, lam2, gs_list, parmain, y0, z0, x0)
 }
 
+sglssnal_main_interface_dense <- function(A, b, lam1, lam2, gs_list, parmain, y0, z0, x0) {
+    .Call('_sglssnal_sglssnal_main_interface_dense', PACKAGE = 'sglssnal', A, b, lam1, lam2, gs_list, parmain, y0, z0, x0)
+}
+

@@ -6,8 +6,9 @@ using namespace Rcpp;
 using namespace arma;
 // [[Rcpp::depends(RcppArmadillo)]]
 
-void mat_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,
-             double lam2, const GroupStruct &gs, double sig, arma::mat &V,
+template <typename MatType>
+void mat_ssn(const arma::vec &u, const MatType &A, double lam1, double lam2,
+             const GroupStruct &gs, double sig, arma::mat &V,
              arma::vec &proj2pv, arma::vec &prox1u) {
   prox1u = proximal_l1(u, lam1);
   vec pv = gs.pma * prox1u;
@@ -44,13 +45,14 @@ void mat_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,
   }
   V.diag() += 1;
   uvec indDD = find(DD);
-  sp_mat A_dd = A.cols(indDD);
+  MatType A_dd = A.cols(indDD);
   V += A_dd * diagmat(DD(indDD)) * A_dd.t();
 }
 
-bool mat2_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,
-              double lam2, const GroupStruct &gs, double sig, arma::mat &V2,
-              arma::sp_mat &D, uint &sp_dim) {
+template <typename MatType>
+bool mat2_ssn(const arma::vec &u, const MatType &A, double lam1, double lam2,
+              const GroupStruct &gs, double sig, arma::mat &V2, sp_mat &D,
+              uint &sp_dim) {
   vec prox1u = proximal_l1(u, lam1);
   vec pv = gs.pma * prox1u;
   int n = A.n_rows;
@@ -74,10 +76,10 @@ bool mat2_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,
     double par1 = sig * cw / grp_norms(k);
     double par2 = par1 / (grp_norms(k) * grp_norms(k));
 
-    sp_mat Al = gs.get_group_subview(A, k);
+    MatType Al = gs.get_group_subview(A, k);
     Al = Al.cols(indvk);
 
-    sp_mat Bl = sqrt(sig - par1) * Al;
+    MatType Bl = sqrt(sig - par1) * Al;
     uint lenind1 = Bl.n_cols;
     uint s_end = s_start + lenind1 - 1;
     B.cols(s_start, s_end) = Bl;
@@ -100,7 +102,8 @@ bool mat2_ssn(const arma::vec &u, const arma::sp_mat &A, double lam1,
   return true;
 }
 
-List conjgrad_linsolver(const arma::sp_mat &A, const arma::vec &rhs,
+template <typename MatType>
+List conjgrad_linsolver(const MatType &A, const arma::vec &rhs,
                         const arma::vec &u, double lam1, double lam2,
                         const GroupStruct &gs, int density, double sig) {
   int n = rhs.n_elem;
@@ -145,3 +148,14 @@ List conjgrad_linsolver(const arma::sp_mat &A, const arma::vec &rhs,
   return List::create(Named("dy") = dy, Named("resnrm") = resnrm,
                       Named("solve_ok") = solve_ok);
 }
+
+// Explicit instantiations
+template List conjgrad_linsolver<sp_mat>(const sp_mat &A, const vec &rhs,
+                                         const vec &u, double lam1, double lam2,
+                                         const GroupStruct &gs, int density,
+                                         double sig);
+
+template List conjgrad_linsolver<mat>(const mat &A, const vec &rhs,
+                                      const vec &u, double lam1, double lam2,
+                                      const GroupStruct &gs, int density,
+                                      double sig);

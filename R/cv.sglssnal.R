@@ -32,7 +32,8 @@ cv.sglssnal <- function(
     A, b, grp_vec, grp_idx, alphas = 0.75, lambdas = NULL,
     nlambda = 100, lambda_min_ratio = 1e-3,
     nfolds = 5, foldid = NULL, printyes = TRUE,
-    stoptol = 1e-6, stoptolcv = 1e-4, quietall = FALSE, ...) {
+    stoptol = 1e-6, stoptolcv = 1e-4,
+    quietall = FALSE, ...) {
   nalpha <- length(alphas)
   n <- length(b)
   p <- ncol(A)
@@ -66,7 +67,6 @@ cv.sglssnal <- function(
     lambdas <- sort(lambdas, decreasing = TRUE)
     nlambda <- length(lambdas)
   }
-  A <- Matrix::Matrix(A, sparse = TRUE)
 
   cv_err <- matrix(0, nlambda, nalpha)
 
@@ -107,10 +107,15 @@ cv.sglssnal <- function(
         tcrossprod(as.matrix(Atrain)),
         k = 1, opts = eigsopt, n = n
       )$values
-    } else {
+    } else if (inherits(Atrain, "sparseMatrix")) {
       Lip <- RSpectra::eigs(
         tcrossprod(Atrain),
         k = 1, which = "LA", opts = eigsopt, n = n
+      )$values
+    } else {
+      Lip <- RSpectra::eigs(
+        tcrossprod(Atrain),
+        k = 1, which = "LM", opts = eigsopt, n = n
       )$values
     }
 
@@ -125,13 +130,12 @@ cv.sglssnal <- function(
         result <- sglssnal(
           Atrain, btrain, grp_vec, grp_idx, lambda, alpha,
           Lip = Lip, y0 = y0, z0 = z0, x0 = x0, printyes = FALSE,
-          stoptol = stoptolcv,
-          ...
+          stoptol = stoptolcv, ...
         )
         y0 <- result$y
         z0 <- result$z
         x0 <- result$x
-        error <- btest - (result$x0 + Atest %*% result$x0)
+        error <- btest - (result$x0 + Atest %*% result$x)
         cv_err[i, k] <- cv_err[i, k] + sum(error^2)
       }
     }
@@ -165,7 +169,8 @@ cv.sglssnal <- function(
 
   result <- sglssnal(
     A, b, grp_vec, grp_idx, lambdas[min_lambda_id], alphas[min_alpha_id],
-    printyes = printyes, stoptol = stoptol, ...
+    printyes = printyes, stoptol = stoptol,
+    ...
   )
 
   cv_info <- list(

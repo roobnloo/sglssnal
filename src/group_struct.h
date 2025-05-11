@@ -17,7 +17,9 @@ struct GroupStruct {
     return x(elem_ids.subvec(kstart, kend));
   }
 
-  sp_mat get_group_subview(const sp_mat &x, int group_id) const {
+  // Template get_group_subview for matrix types
+  template <typename MatType>
+  MatType get_group_subview(const MatType &x, int group_id) const {
     int kstart = ind(0, group_id);
     int kend = ind(1, group_id);
     return x.cols(elem_ids.subvec(kstart, kend));

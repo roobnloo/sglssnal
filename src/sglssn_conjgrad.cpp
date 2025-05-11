@@ -114,9 +114,10 @@ List findstep_impl(const arma::vec &b, double sig, double psi_y0,
                       Named("alp") = alp, Named("iter") = iter);
 }
 
+template <typename MatType>
 List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
                      const arma::vec &x0, const arma::vec &Ax0,
-                     const arma::sp_mat &A, const arma::vec &b, double lam1,
+                     const MatType &A, const arma::vec &b, double lam1,
                      double lam2, const GroupStruct &gs, List &par,
                      bool printsub, int maxitersub, double tol) {
   int breakyes = 0;
@@ -372,3 +373,16 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
                       Named("Ax") = Ax, Named("par") = par,
                       Named("runhist") = runhist, Named("info") = info);
 }
+
+// Explicit instantiations
+template List
+sglssn_conjgrad<sp_mat>(const vec &y0, const vec &Aty0, const vec &x0,
+                        const vec &Ax0, const sp_mat &A, const vec &b,
+                        double lam1, double lam2, const GroupStruct &gs,
+                        List &par, bool printsub, int maxitersub, double tol);
+
+template List sglssn_conjgrad<mat>(const vec &y0, const vec &Aty0,
+                                   const vec &x0, const vec &Ax0, const mat &A,
+                                   const vec &b, double lam1, double lam2,
+                                   const GroupStruct &gs, List &par,
+                                   bool printsub, int maxitersub, double tol);
