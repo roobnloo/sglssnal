@@ -32,7 +32,7 @@ template <typename MatType>
 List sglssnal_main(const MatType &A, const arma::vec &b, double lam1,
                    double lam2, const GroupStruct &gs, const List &parmain,
                    const arma::vec &y0, const arma::vec &z0,
-                   const arma::vec &x0) {
+                   const arma::vec &x0, bool intercept) {
   double Lip = as<double>(parmain["Lip"]);
   int maxit = as<int>(parmain["maxit"]);
   bool printyes = as<bool>(parmain["printyes"]);
@@ -53,6 +53,9 @@ List sglssnal_main(const MatType &A, const arma::vec &b, double lam1,
   arma::vec Aty = A.t() * y;
   arma::vec Ax = A * x;
   arma::vec Px = gs.pma * x;
+
+  // Initialize accumulated intercept term
+  double intercept_accum = 0.0;
 
   arma::vec obj(2);
   obj[0] = 0.5 * sum(square(Ax - b)) + lam2 * group_l2_norm(Px, gs) +
@@ -143,6 +146,18 @@ List sglssnal_main(const MatType &A, const arma::vec &b, double lam1,
     dualfeas = normRd / (1 + norm(z, 2));
     arma::vec Axb = Ax - b;
     Rp = Axb - y;
+
+    // Center the primal residuals and accumulate the mean into the intercept
+    if (intercept) {
+      double mean_residual = mean(Rp);
+      intercept_accum -=
+          mean_residual; // Accumulate the mean into intercept (subtract because
+                         // residual = Ax - b - y)
+      Rp = Rp - mean_residual; // Center the residuals
+      Ax = Ax - mean_residual; // Adjust predictions to account for the centered
+                               // residuals
+    }
+
     double normRp = norm(Rp, 2);
     primfeas = normRp / normb;
 
@@ -272,31 +287,34 @@ List sglssnal_main(const MatType &A, const arma::vec &b, double lam1,
 
   return List::create(Named("y") = y, Named("z") = z, Named("x") = x,
                       Named("obj") = obj, Named("info") = info,
-                      Named("runhist") = runhist);
+                      Named("runhist") = runhist,
+                      Named("intercept") = intercept_accum);
 }
 
 // Explicit instantiations
 template List sglssnal_main<sp_mat>(const sp_mat &A, const vec &b, double lam1,
                                     double lam2, const GroupStruct &gs,
                                     const List &parmain, const vec &y0,
-                                    const vec &z0, const vec &x0);
+                                    const vec &z0, const vec &x0,
+                                    bool intercept);
 
 template List sglssnal_main<mat>(const mat &A, const vec &b, double lam1,
                                  double lam2, const GroupStruct &gs,
                                  const List &parmain, const vec &y0,
-                                 const vec &z0, const vec &x0);
+                                 const vec &z0, const vec &x0, bool intercept);
 
 // [[Rcpp::export]]
 List sglssnal_main_interface(const arma::sp_mat &A, const arma::vec &b,
                              double lam1, double lam2, const List &gs_list,
                              const List &parmain, const arma::vec &y0,
-                             const arma::vec &z0, const arma::vec &x0) {
+                             const arma::vec &z0, const arma::vec &x0,
+                             bool intercept) {
   uvec G = as<uvec>(gs_list["G"]);
   mat ind = as<mat>(gs_list["ind"]);
   uint num_group = ind.n_cols;
   GroupStruct gs = {as<sp_mat>(gs_list["pma"]), G, ind, num_group};
 
-  return sglssnal_main(A, b, lam1, lam2, gs, parmain, y0, z0, x0);
+  return sglssnal_main(A, b, lam1, lam2, gs, parmain, y0, z0, x0, intercept);
 }
 
 // [[Rcpp::export]]
@@ -304,11 +322,11 @@ List sglssnal_main_interface_dense(const arma::mat &A, const arma::vec &b,
                                    double lam1, double lam2,
                                    const List &gs_list, const List &parmain,
                                    const arma::vec &y0, const arma::vec &z0,
-                                   const arma::vec &x0) {
+                                   const arma::vec &x0, bool intercept) {
   uvec G = as<uvec>(gs_list["G"]);
   mat ind = as<mat>(gs_list["ind"]);
   uint num_group = ind.n_cols;
   GroupStruct gs = {as<sp_mat>(gs_list["pma"]), G, ind, num_group};
 
-  return sglssnal_main(A, b, lam1, lam2, gs, parmain, y0, z0, x0);
+  return sglssnal_main(A, b, lam1, lam2, gs, parmain, y0, z0, x0, intercept);
 }

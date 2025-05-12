@@ -69,6 +69,7 @@ sglssnal <- function(
   stopifnot("stopopt must be one of 1, 2, 3, or 4" = stopopt %in% c(1L, 2L, 3L, 4L))
   stopifnot("maxit must be a positive integer" = maxit > 0)
   stopifnot("stoptol must be a positive number" = stoptol > 0)
+  stopifnot("grp_idx must be within the range of grp_vec" = max(grp_idx) <= max(grp_vec))
 
   lambda1 <- alpha * lambda
   lambda2 <- lambda * (1 - alpha)
@@ -76,7 +77,7 @@ sglssnal <- function(
   n <- length(b)
   p <- ncol(A)
   b_mean <- mean(b)
-  A_sd <- sqrt(Matrix::colSums(A^2) / n)
+  A_sd <- sqrt(Matrix::colSums(A^2))
   A_sd[A_sd < sqrt(.Machine$double.eps)] <- 1
   if (intercept) {
     b <- b - b_mean
@@ -148,11 +149,11 @@ sglssnal <- function(
   result <- NULL
   if (inherits(A, "sparseMatrix")) {
     result <- sglssnal_main_interface(
-      A, b, lambda1, lambda2, gs, parmain, y, z, x
+      A, b, lambda1, lambda2, gs, parmain, y, z, x, intercept
     )
   } else {
     result <- sglssnal_main_interface_dense(
-      A, b, lambda1, lambda2, gs, parmain, y, z, x
+      A, b, lambda1, lambda2, gs, parmain, y, z, x, intercept
     )
   }
   y <- result$y
@@ -164,7 +165,7 @@ sglssnal <- function(
   }
   x0 <- 0
   if (intercept) {
-    x0 <- b_mean
+    x0 <- b_mean + result$intercept # Add the accumulated intercept from residual centering
   }
   info_main <- result$info
   runhist_main <- result$runhist

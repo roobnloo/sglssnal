@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // sglssnal_main_interface
-List sglssnal_main_interface(const arma::sp_mat& A, const arma::vec& b, double lam1, double lam2, const List& gs_list, const List& parmain, const arma::vec& y0, const arma::vec& z0, const arma::vec& x0);
-RcppExport SEXP _sglssnal_sglssnal_main_interface(SEXP ASEXP, SEXP bSEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP gs_listSEXP, SEXP parmainSEXP, SEXP y0SEXP, SEXP z0SEXP, SEXP x0SEXP) {
+List sglssnal_main_interface(const arma::sp_mat& A, const arma::vec& b, double lam1, double lam2, const List& gs_list, const List& parmain, const arma::vec& y0, const arma::vec& z0, const arma::vec& x0, bool intercept);
+RcppExport SEXP _sglssnal_sglssnal_main_interface(SEXP ASEXP, SEXP bSEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP gs_listSEXP, SEXP parmainSEXP, SEXP y0SEXP, SEXP z0SEXP, SEXP x0SEXP, SEXP interceptSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -26,13 +26,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type y0(y0SEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type z0(z0SEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type x0(x0SEXP);
-    rcpp_result_gen = Rcpp::wrap(sglssnal_main_interface(A, b, lam1, lam2, gs_list, parmain, y0, z0, x0));
+    Rcpp::traits::input_parameter< bool >::type intercept(interceptSEXP);
+    rcpp_result_gen = Rcpp::wrap(sglssnal_main_interface(A, b, lam1, lam2, gs_list, parmain, y0, z0, x0, intercept));
     return rcpp_result_gen;
 END_RCPP
 }
 // sglssnal_main_interface_dense
-List sglssnal_main_interface_dense(const arma::mat& A, const arma::vec& b, double lam1, double lam2, const List& gs_list, const List& parmain, const arma::vec& y0, const arma::vec& z0, const arma::vec& x0);
-RcppExport SEXP _sglssnal_sglssnal_main_interface_dense(SEXP ASEXP, SEXP bSEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP gs_listSEXP, SEXP parmainSEXP, SEXP y0SEXP, SEXP z0SEXP, SEXP x0SEXP) {
+List sglssnal_main_interface_dense(const arma::mat& A, const arma::vec& b, double lam1, double lam2, const List& gs_list, const List& parmain, const arma::vec& y0, const arma::vec& z0, const arma::vec& x0, bool intercept);
+RcppExport SEXP _sglssnal_sglssnal_main_interface_dense(SEXP ASEXP, SEXP bSEXP, SEXP lam1SEXP, SEXP lam2SEXP, SEXP gs_listSEXP, SEXP parmainSEXP, SEXP y0SEXP, SEXP z0SEXP, SEXP x0SEXP, SEXP interceptSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -45,14 +46,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type y0(y0SEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type z0(z0SEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type x0(x0SEXP);
-    rcpp_result_gen = Rcpp::wrap(sglssnal_main_interface_dense(A, b, lam1, lam2, gs_list, parmain, y0, z0, x0));
+    Rcpp::traits::input_parameter< bool >::type intercept(interceptSEXP);
+    rcpp_result_gen = Rcpp::wrap(sglssnal_main_interface_dense(A, b, lam1, lam2, gs_list, parmain, y0, z0, x0, intercept));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_sglssnal_sglssnal_main_interface", (DL_FUNC) &_sglssnal_sglssnal_main_interface, 9},
-    {"_sglssnal_sglssnal_main_interface_dense", (DL_FUNC) &_sglssnal_sglssnal_main_interface_dense, 9},
+    {"_sglssnal_sglssnal_main_interface", (DL_FUNC) &_sglssnal_sglssnal_main_interface, 10},
+    {"_sglssnal_sglssnal_main_interface_dense", (DL_FUNC) &_sglssnal_sglssnal_main_interface_dense, 10},
     {NULL, NULL, 0}
 };
 
