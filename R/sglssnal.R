@@ -38,7 +38,7 @@
 #' @param stopopt Stopping criteria. 1: relative duality gap and feasibility,
 #'   2: KKT conditions, 3: dual feasibility and relative duality gap,
 #'   4: dual feasibility and absolute duality gap. Default is `2L`.
-#' @param printyes Print progress in main loop. Default is `TRUE`.
+#' @param printmain Print progress in main loop. Default is `TRUE`.
 #' @param printsub Print progress in subproblem. Default is `FALSE`.
 #' @param maxit Maximum number of iterations. Default is `5000L`.
 #' @param Lip Lipschitz constant for the step size.
@@ -55,6 +55,7 @@
 #' * `info`: List containing information about the optimization process for each lambda.
 #' * `lambda`: Vector of lambda values used.
 #' @importFrom Rcpp sourceCpp
+#' @importFrom methods rbind2
 #' @useDynLib sglssnal
 #' @references Zhang, Y., Zhang, N., Sun, D., & Toh, K. C. (2020).
 #'   \emph{An efficient Hessian based algorithm for solving large-scale
@@ -66,7 +67,7 @@ sglssnal <- function(
     nlambda = 100, lambda_min_ratio = 1e-4, alpha = 0.05,
     pfgroup = rep(1, ncol(grp_idx)), intercept = TRUE,
     standardize = TRUE, stoptol = 1e-6, stopopt = 2L,
-    printyes = TRUE, printsub = FALSE, maxit = 5000L, Lip = NULL,
+    printmain = TRUE, printsub = FALSE, maxit = 5000L, Lip = NULL,
     y0 = NULL, z0 = NULL, x0 = NULL) {
   stopifnot("length(alpha) must be 1" = length(alpha) == 1)
   # Generate lambda sequence if lambda is NULL
@@ -148,7 +149,7 @@ sglssnal <- function(
       )$values
     }
 
-    if (printyes) {
+    if (printmain) {
       message(sprintf(
         "\n Lip = %3.2e, time = %3.2f",
         Lip, as.numeric(difftime(Sys.time(), tstartLip, units = "secs"))
@@ -179,7 +180,7 @@ sglssnal <- function(
     Lip = Lip,
     maxit = maxit,
     stopopt = stopopt,
-    printyes = printyes,
+    printmain = printmain,
     printsub = printsub,
     p = p,
     n = n
@@ -196,7 +197,7 @@ sglssnal <- function(
 
   # Loop through lambda values
   for (i in 1:nlambda) {
-    if (printyes) {
+    if (printmain) {
       message(sprintf("\nFitting model for lambda = %g (%d/%d)", lambda[i], i, nlambda))
     }
 
@@ -264,7 +265,7 @@ sglssnal <- function(
       mse = mean((as.numeric(b - A %*% x))^2)
     )
 
-    if (printyes) {
+    if (printmain) {
       message("\n****************************************")
       message(sprintf(" SSNAL       : %s", msg))
       message(sprintf(" iteration   : %d", iter))

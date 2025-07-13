@@ -14,7 +14,8 @@ RoxygenNote: 7.3.2
 Imports:
     Matrix,
     Rcpp,
-    RSpectra
+    RSpectra,
+    methods
 LinkingTo: 
     Rcpp,
     RcppArmadillo

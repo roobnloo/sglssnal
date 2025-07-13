@@ -35,7 +35,7 @@ List sglssnal_main(const MatType &A, const arma::vec &b, double lam1,
                    const arma::vec &x0, bool intercept) {
   double Lip = as<double>(parmain["Lip"]);
   int maxit = as<int>(parmain["maxit"]);
-  bool printyes = as<bool>(parmain["printyes"]);
+  bool printmain = as<bool>(parmain["printmain"]);
   bool printsub = as<bool>(parmain["printsub"]);
   double stoptol = as<double>(parmain["stoptol"]);
   int stopopt = as<int>(parmain["stopopt"]);
@@ -72,7 +72,7 @@ List sglssnal_main(const MatType &A, const arma::vec &b, double lam1,
   double relgap =
       std::abs(obj[0] - obj[1]) / (1 + std::abs(obj[0]) + std::abs(obj[1]));
 
-  if (printyes) {
+  if (printmain) {
     Rcout << "\n n=" << p << ", m=" << n << ", tol=" << stoptol
           << ", parameters: lambda1=" << lam1 << ", lambda2=" << lam2 << "\n";
     Rcout << " ---------------------------------------------------\n";
@@ -194,7 +194,7 @@ List sglssnal_main(const MatType &A, const arma::vec &b, double lam1,
     ttime_vec.push_back(ttime);
     itersub_vec.push_back(as<int>(info_ncg["itersub"]));
 
-    if (printyes) {
+    if (printmain) {
       Rcout << "\n"
             << std::right << std::setw(5) << iter << std::left
             << std::scientific << std::setprecision(2) << std::setw(3) << "|  ["

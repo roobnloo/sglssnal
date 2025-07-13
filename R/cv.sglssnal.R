@@ -31,13 +31,13 @@
 cv.sglssnal <- function(
     A, b, grp_vec, grp_idx, alpha = 0.75, lambda = NULL,
     nlambda = 100, lambda_min_ratio = 1e-4,
-    nfolds = 5, foldid = NULL, printyes = TRUE,
+    nfolds = 5, foldid = NULL, printmain = TRUE,
     stoptol = 1e-6, stoptolcv = 1e-4,
     quietall = FALSE, ...) {
   n <- length(b)
   p <- ncol(A)
   if (quietall) {
-    printyes <- FALSE
+    printmain <- FALSE
   }
   stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
   stopifnot("length(alpha) must be 1" = length(alpha) == 1)
@@ -61,7 +61,7 @@ cv.sglssnal <- function(
     A, b, grp_vec, grp_idx,
     lambda = lambda,
     nlambda = nlambda, lambda_min_ratio = lambda_min_ratio,
-    alpha = alpha, printyes = printyes, stoptol = stoptol, ...
+    alpha = alpha, printmain = printmain, stoptol = stoptol, ...
   )
 
   # Use the lambda sequence from the full model run
@@ -125,7 +125,7 @@ cv.sglssnal <- function(
 
     result <- sglssnal(
       Atrain, btrain, grp_vec, grp_idx, lambdas, alpha,
-      Lip = Lip, y0 = y0, z0 = z0, x0 = x0, printyes = FALSE,
+      Lip = Lip, y0 = y0, z0 = z0, x0 = x0, printmain = FALSE,
       stoptol = stoptolcv, ...
     )
 
