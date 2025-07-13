@@ -4,13 +4,15 @@
 \alias{coef.sglssnal}
 \title{Extract estimated coefficients from a \code{sglssnal} object}
 \usage{
-\method{coef}{sglssnal}(object)
+\method{coef}{sglssnal}(object, ...)
 }
 \arguments{
 \item{object}{Fitted object of class \code{sglssnal}.}
+
+\item{...}{Additional arguments passed to or from other methods.}
 }
 \value{
-A numeric vector of estimated coefficients.
+A numeric matrix of estimated coefficients.
 }
 \description{
 Extract estimated coefficients from a \code{sglssnal} object

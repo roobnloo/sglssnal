@@ -9,9 +9,13 @@ sglssnal(
   b,
   grp_vec,
   grp_idx,
-  lambda,
-  alpha,
+  lambda = NULL,
+  nlambda = 100,
+  lambda_min_ratio = 1e-04,
+  alpha = 0.05,
   pfgroup = rep(1, ncol(grp_idx)),
+  intercept = TRUE,
+  standardize = TRUE,
   stoptol = 1e-06,
   stopopt = 2L,
   printyes = TRUE,
@@ -37,15 +41,27 @@ If there are \eqn{g} groups and \code{G_i} contains the indices of the
 \code{grp_vec[grp_idx[1, i]:grp_idx[2, i]]} are the indices of the \code{i}-th
 group.}
 
-\item{lambda}{Penalty parameter together with \code{alpha}.
-\code{alpha * lambda} is the \eqn{\ell_1} penalty and \code{(1 - alpha) * lambda}
-is the group \eqn{\ell_2} penalty.}
+\item{lambda}{Vector of penalty parameters or a single value. If \code{NULL}, a
+path is automatically generated based on \code{norm(t(A) \%*\% b, "I")} and
+\code{lambda_min_ratio}. The path is fit using warm starts from larger to smaller
+lambda values.}
+
+\item{nlambda}{Number of lambda values to use when \code{lambda} is \code{NULL}. Default is 100.}
+
+\item{lambda_min_ratio}{Minimum ratio of the smallest to largest lambda when \code{lambda} is \code{NULL}.
+Default is 1e-4.}
 
 \item{alpha}{Determines the relative weight of the \eqn{\ell_1} and
 group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}.}
 
 \item{pfgroup}{Penalty factor for each group in the group lasso.
 Default is a vector of ones, indicating no weighting for any group.}
+
+\item{intercept}{Centers mean function at 0 through \eqn{y - \bar{y}}.
+Default is \code{TRUE}.}
+
+\item{standardize}{Whether to standardize the columns of A to have unit norm.
+Default is \code{TRUE}.}
 
 \item{stoptol}{Tolerance for stopping criteria. Default is \code{1e-6}.}
 
@@ -71,12 +87,13 @@ Automatically computed as the maximum eigenvalue of AA' if \code{NULL}.}
 \value{
 List of class \code{sglssnal} containing the following components:
 \itemize{
-\item \code{obj}: Vector containing primal and dual objective values at the solution.
-\item \code{x}: The primal variable of interest.
-\item \code{y}: The y dual variable.
-\item \code{z}: The z dual variable.
-\item \code{info}: List containing information about the optimization process such as
-relative gap, iteration number, and run time.
+\item \code{obj}: Matrix containing primal and dual objective values for each lambda.
+\item \code{x}: Matrix of primal variables, with each column corresponding to a lambda.
+\item \code{x0}: Vector of intercept values for each lambda.
+\item \code{y}: Matrix of y dual variables, with each column corresponding to a lambda.
+\item \code{z}: Matrix of z dual variables, with each column corresponding to a lambda.
+\item \code{info}: List containing information about the optimization process for each lambda.
+\item \code{lambda}: Vector of lambda values used.
 }
 }
 \description{

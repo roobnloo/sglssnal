@@ -4,15 +4,17 @@
 \alias{predict.sglssnal}
 \title{Predict method for \code{sglssnal} objects}
 \usage{
-\method{predict}{sglssnal}(object, newdata)
+\method{predict}{sglssnal}(object, newdata, ...)
 }
 \arguments{
 \item{object}{Fitted object of class \code{sglssnal}.}
 
 \item{newdata}{A matrix of new data.}
+
+\item{...}{Additional arguments passed to or from other methods.}
 }
 \value{
-A numeric vector of predictions.
+A numeric matrix of predictions, with columns corresponding to lambda values.
 }
 \description{
 Predict method for \code{sglssnal} objects
