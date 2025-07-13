@@ -5,7 +5,10 @@
 #' @method coef sglssnal
 #' @export
 coef.sglssnal <- function(object, ...) {
-  object$x
+  x0 <- matrix(object$x0, nrow = 1)
+  rownames(x0) <- "(Intercept)"
+  x <- rbind2(x0, object$x)
+  return(x)
 }
 
 #' Predict method for `sglssnal` objects

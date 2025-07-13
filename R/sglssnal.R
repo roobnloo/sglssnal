@@ -68,6 +68,7 @@ sglssnal <- function(
     standardize = TRUE, stoptol = 1e-6, stopopt = 2L,
     printyes = TRUE, printsub = FALSE, maxit = 5000L, Lip = NULL,
     y0 = NULL, z0 = NULL, x0 = NULL) {
+  stopifnot("length(alpha) must be 1" = length(alpha) == 1)
   # Generate lambda sequence if lambda is NULL
   if (is.null(lambda)) {
     if (nlambda <= 0) {
@@ -278,12 +279,20 @@ sglssnal <- function(
     }
   }
 
+  stepnames <- paste("s", seq_len(nlambda) - 1, sep = "")
+  vnames <- colnames(A)
+  if (is.null(vnames)) {
+    vnames <- paste("V", seq_len(p), sep = "")
+  }
+  dimnames(x_mat) <- list(vnames, stepnames)
+  x <- Matrix::drop0(x_mat)
+
   fit <- list(
     lambda = lambda,
     alpha = alpha,
     obj = all_obj,
     x0 = x0_vec,
-    x = x_mat,
+    x = x,
     y = y_mat,
     z = z_mat,
     intercept = intercept,
