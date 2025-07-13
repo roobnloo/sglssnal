@@ -74,7 +74,7 @@ test_that("intercept", {
     printyes = FALSE, intercept = FALSE, standardize = FALSE
   )
 
-  ints <- c(mean(ystar) - cm %*% result_cent$x, result_intr$x0)
+  ints <- c(as.numeric(mean(ystar) - cm %*% result_cent$x), result_intr$x0)
 
   expect_true(
     abs(diff(ints)) < 0.01,
