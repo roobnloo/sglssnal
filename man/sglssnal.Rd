@@ -18,7 +18,7 @@ sglssnal(
   standardize = TRUE,
   stoptol = 1e-06,
   stopopt = 2L,
-  printyes = TRUE,
+  printmain = TRUE,
   printsub = FALSE,
   maxit = 5000L,
   Lip = NULL,
@@ -69,7 +69,7 @@ Default is \code{TRUE}.}
 2: KKT conditions, 3: dual feasibility and relative duality gap,
 4: dual feasibility and absolute duality gap. Default is \code{2L}.}
 
-\item{printyes}{Print progress in main loop. Default is \code{TRUE}.}
+\item{printmain}{Print progress in main loop. Default is \code{TRUE}.}
 
 \item{printsub}{Print progress in subproblem. Default is \code{FALSE}.}
 

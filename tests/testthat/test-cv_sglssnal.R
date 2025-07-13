@@ -51,7 +51,7 @@ test_that("run with default lambda", {
   single <- sglssnal::sglssnal(
     A, ystar, grp, ind,
     nlambda = nlambda, alpha = 0.5,
-    intercept = FALSE, standardize = FALSE, printyes = FALSE
+    intercept = FALSE, standardize = FALSE, printmain = FALSE
   )
 
   expect_true(all.equal(result$x, single$x))

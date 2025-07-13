@@ -11,7 +11,7 @@ test_that("simple run of sglssnal", {
   ind <- matrix(c(1, 20, 21, 100, 101, 200), nrow = 2)
 
   result <- sglssnal::sglssnal(A, ystar, grp, ind, 2,
-    alpha = 0.5, printyes = FALSE, intercept = FALSE, standardize = FALSE
+    alpha = 0.5, printmain = FALSE, intercept = FALSE, standardize = FALSE
   )
   obj <- round(result$obj, 3)
   expect_obj <- matrix(c(19.358, 19.358), nrow = 2)
@@ -34,10 +34,10 @@ test_that("sparse and dense run", {
   grp <- 1:p
   ind <- matrix(c(1, 20, 21, 100, 101, 200), nrow = 2)
 
-  result_dense <- sglssnal::sglssnal(A, ystar, grp, ind, 2, alpha = 0.5, printyes = FALSE)
+  result_dense <- sglssnal::sglssnal(A, ystar, grp, ind, 2, alpha = 0.5, printmain = FALSE)
 
   A_sp <- Matrix::Matrix(A, sparse = TRUE)
-  result_sparse <- sglssnal::sglssnal(A_sp, ystar, grp, ind, 2, alpha = 0.5, printyes = FALSE)
+  result_sparse <- sglssnal::sglssnal(A_sp, ystar, grp, ind, 2, alpha = 0.5, printmain = FALSE)
 
   obj <- sum(abs(round(result_dense$obj - result_sparse$obj, 10)))
   expect_equal(obj, 0)
@@ -61,7 +61,7 @@ test_that("intercept", {
   result_intr <- sglssnal::sglssnal(
     A, ystar, grp, ind, 1,
     alpha = 0, pfgroup = pfgroup, stoptol = 1e-8,
-    printyes = FALSE, intercept = TRUE, standardize = FALSE
+    printmain = FALSE, intercept = TRUE, standardize = FALSE
   )
 
   cm <- colMeans(A)
@@ -71,7 +71,7 @@ test_that("intercept", {
   result_cent <- sglssnal::sglssnal(
     Ac, yc, grp, ind, 1,
     alpha = 0, pfgroup = pfgroup, stoptol = 1e-8,
-    printyes = FALSE, intercept = FALSE, standardize = FALSE
+    printmain = FALSE, intercept = FALSE, standardize = FALSE
   )
 
   ints <- c(as.numeric(mean(ystar) - cm %*% result_cent$x), result_intr$x0)
@@ -98,7 +98,7 @@ test_that("lambda path", {
 
   result <- sglssnal::sglssnal(A, ystar, grp, ind,
     lambda = lambda, alpha = 0.5,
-    printyes = FALSE, intercept = FALSE, standardize = FALSE
+    printmain = FALSE, intercept = FALSE, standardize = FALSE
   )
 
   expect_equal(length(result$lambda), 10)

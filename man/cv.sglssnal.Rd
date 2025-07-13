@@ -15,7 +15,7 @@ cv.sglssnal(
   lambda_min_ratio = 1e-04,
   nfolds = 5,
   foldid = NULL,
-  printyes = TRUE,
+  printmain = TRUE,
   stoptol = 1e-06,
   stoptolcv = 1e-04,
   quietall = FALSE,
@@ -53,7 +53,7 @@ Ignored if \code{foldid} is provided.}
 \item{foldid}{Vector of integers specifying the fold for each observation.
 If \code{NULL}, a default assignment is used.}
 
-\item{printyes}{Print progress in main loop. Default is \code{TRUE}.}
+\item{printmain}{Print progress in main loop. Default is \code{TRUE}.}
 
 \item{stoptol}{Tolerance for stopping criteria. Default is \code{1e-6}.}
 
