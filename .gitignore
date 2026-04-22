@@ -4,3 +4,4 @@
 scratch/
 .vscode/
 compile_flags.txt
+*.code-workspace

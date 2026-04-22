@@ -19,7 +19,7 @@ arma::vec proximal_l2(const arma::vec &z, double lam, const GroupStruct &gs) {
   for (uint i = 0; i < gs.num_group; ++i) {
     int kstart = gs.ind(0, i);
     int kend = gs.ind(1, i);
-    int w = lam * gs.ind(2, i);
+    double w = lam * gs.ind(2, i);
 
     double l2norm = norm(z.subvec(kstart, kend), 2);
     if (l2norm > w) {

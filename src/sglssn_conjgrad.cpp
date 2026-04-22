@@ -144,8 +144,10 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
   IntegerVector solve_ok_vec(maxitersub), findstep_vec(maxitersub),
       psqmr_vec(maxitersub);
   double av_findstep;
+  int last_itersub = 0;
 
   for (int itersub = 1; itersub <= maxitersub; ++itersub) {
+    last_itersub = itersub;
     Ax = A * x;
     arma::vec Grad = -y - b + Ax;
     double normGrad = norm(Grad, 2);
@@ -248,7 +250,7 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
     solve_ok_vec[itersub - 1] = solve_ok;
     psqmr_vec[itersub - 1] = iterpsqmr;
     findstep_vec[itersub - 1] = iterstep;
-    av_findstep = mean(findstep_vec);
+    av_findstep = mean(findstep_vec[Range(0, last_itersub - 1)]);
 
     if (alp < tiny)
       breakyes = 11;
@@ -325,8 +327,9 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
         breakyes = 4;
       }
 
-      if (itersub >= 10 && dualinf_sub > 5 * min(dualinf_vec) &&
-          priminf_sub > 2 * min(priminf_vec)) {
+      if (itersub >= 10 &&
+          dualinf_sub > 5 * min(dualinf_vec[Range(0, last_itersub - 1)]) &&
+          priminf_sub > 2 * min(priminf_vec[Range(0, last_itersub - 1)])) {
         if (printsub)
           Rcpp::Rcout << "$$$";
         breakyes = 5;
@@ -356,9 +359,9 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
 
   List info;
   info["maxCG"] = (int)max(psqmr_vec);
-  info["avgCG"] = (double)sum(psqmr_vec) / maxitersub;
+  info["avgCG"] = (double)sum(psqmr_vec[Range(0, last_itersub - 1)]) / last_itersub;
   info["breakyes"] = breakyes;
-  info["itersub"] = maxitersub;
+  info["itersub"] = last_itersub;
   info["tolconst"] = tolconst;
 
   List runhist = List::create(
