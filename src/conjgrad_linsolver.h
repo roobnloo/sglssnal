@@ -7,16 +7,18 @@
 template <typename MatType>
 Rcpp::List conjgrad_linsolver(const MatType &A, const arma::vec &rhs,
                               const arma::vec &u, double lam1, double lam2,
-                              const GroupStruct &gs, int density, double sig);
+                              const GroupStruct &gs, int density, double sig,
+                              Rcpp::List &par);
 
 // Explicit instantiations declaration
 extern template Rcpp::List conjgrad_linsolver<arma::sp_mat>(
     const arma::sp_mat &A, const arma::vec &rhs, const arma::vec &u,
-    double lam1, double lam2, const GroupStruct &gs, int density, double sig);
+    double lam1, double lam2, const GroupStruct &gs, int density, double sig,
+    Rcpp::List &par);
 
-extern template Rcpp::List
-conjgrad_linsolver<arma::mat>(const arma::mat &A, const arma::vec &rhs,
-                              const arma::vec &u, double lam1, double lam2,
-                              const GroupStruct &gs, int density, double sig);
+extern template Rcpp::List conjgrad_linsolver<arma::mat>(
+    const arma::mat &A, const arma::vec &rhs, const arma::vec &u, double lam1,
+    double lam2, const GroupStruct &gs, int density, double sig,
+    Rcpp::List &par);
 
 #endif
