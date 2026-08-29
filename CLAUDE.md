@@ -70,16 +70,20 @@ prox/projection primitives — `proximal_combo` in particular implements the
 paper's Prop. 2.1 decomposition (soft-threshold then per-group ℓ2
 projection) that the whole algorithm is built on.
 
-**Group structure is a permutation, not a partition assignment.**
-`group_structure()` (`R/group_structure.R`) takes `grp_vec` (the
-concatenation `c(G_1, ..., G_g)` of member indices) and `grp_idx` (2×g
-start/end positions *within* `grp_vec`) and builds a `GroupStruct`
-(`src/group_struct.h`): a sparse permutation matrix `pma` plus group
-boundaries, consumed directly by the C++ solvers via
-`get_group_subview()`. This only works as a true partition — see the
-GitHub issue tracking replacing this with a single group-membership
-vector, which is both simpler and forecloses malformed/overlapping input
-by construction.
+**Group structure is a single membership vector, converted internally to a
+permutation.** The public API takes `group` (length-`p`, `group[j]` is the
+group id of column `j` of `A`, à la `sparsegl`/`gglasso`; ids need not be
+contiguous or sorted). `group_structure()` (`R/group_structure.R`) derives
+the group ordering from `sort(unique(group))`, builds a stable permutation
+(`order(match(group, ug))`) grouping same-id coordinates into contiguous
+blocks, and from that builds a `GroupStruct` (`src/group_struct.h`): a
+sparse permutation matrix `pma` plus group boundaries, consumed directly by
+the C++ solvers via `get_group_subview()`. `pfgroup` (per-group weight) is
+indexed by that same `sort(unique(group))` order, not by first-appearance
+order in `group`. Because a membership vector can't assign one coordinate
+to two groups, this also forecloses overlapping-group input by
+construction — the underlying SSNAL method only supports a true partition
+(Assumption 1.1 in Zhang et al. 2020), so this isn't just a convenience.
 
 **Preprocessing happens in R, at two different layers of the pipeline.**
 `sglssnal()` (`R/sglssnal.R`) does intercept handling (mean-center `b`) and

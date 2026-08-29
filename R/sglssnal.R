@@ -12,13 +12,10 @@
 #'   The algorithm is based on the work of Zhang et al. (2020).
 #' @param A \eqn{n \times p} design matrix.
 #' @param b \eqn{n} response vector.
-#' @param grp_vec Vector of indicies of variables in each group.
-#'   If there are \eqn{g} groups and `G_i` contains the indices of the
-#'   `i`-th group, then `grp_vec` should be the concatenated vector
-#'   `c(G_1, G_2, ..., G_g)`.
-#' @param grp_idx \eqn{2 \times g} matrix indexing the groups in `grp_vec`.
-#'   `grp_vec[grp_idx[1, i]:grp_idx[2, i]]` are the indices of the `i`-th
-#'   group.
+#' @param group Length-\eqn{p} group-membership vector: `group[j]` is the
+#'   group id of column `j` of `A`. Group ids may be any atomic vector
+#'   (integer, character, or factor) and need not be contiguous or sorted;
+#'   groups are formed from `sort(unique(group))`.
 #' @param lambda Vector of penalty parameters or a single value. If `NULL`, a
 #'   path is automatically generated based on `norm(t(A) %*% b, "I")` and
 #'   `lambda_min_ratio`. The path is fit using warm starts from larger to smaller
@@ -28,8 +25,9 @@
 #' @param nlambda Number of lambda values to use when `lambda` is `NULL`. Default is 100.
 #' @param lambda_min_ratio Minimum ratio of the smallest to largest lambda when `lambda` is `NULL`.
 #'   Default is 1e-4.
-#' @param pfgroup Penalty factor for each group in the group lasso.
-#'   Default is a vector of ones, indicating no weighting for any group.
+#' @param pfgroup Penalty factor for each group in the group lasso, ordered
+#'   by `sort(unique(group))`. Default is a vector of ones, indicating no
+#'   weighting for any group.
 #' @param standardize Whether to standardize the columns of A to have unit norm.
 #'   Default is `TRUE`.
 #' @param intercept Centers mean function at 0 through \eqn{y - \bar{y}}.
@@ -63,9 +61,9 @@
 #'   \doi{https://doi.org/10.1007/s10107-018-1329-6}.
 #' @export
 sglssnal <- function(
-    A, b, grp_vec, grp_idx, lambda = NULL,
+    A, b, group, lambda = NULL,
     nlambda = 100, lambda_min_ratio = 1e-4, alpha = 0.05,
-    pfgroup = rep(1, ncol(grp_idx)), intercept = TRUE,
+    pfgroup = rep(1, length(unique(group))), intercept = TRUE,
     standardize = TRUE, stoptol = 1e-6, stopopt = 2L,
     printmain = TRUE, printsub = FALSE, maxit = 5000L, Lip = NULL,
     y0 = NULL, z0 = NULL, x0 = NULL) {
@@ -97,11 +95,10 @@ sglssnal <- function(
   stopifnot("lambda values must be positive" = all(lambda > 0))
   stopifnot("alpha must be in [0, 1]" = alpha >= 0 & alpha <= 1)
   stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
-  stopifnot("length(pfgroup) must be equal to ncol(grp_idx)" = length(pfgroup) == ncol(grp_idx))
+  stopifnot("length(group) must be equal to ncol(A)" = length(group) == ncol(A))
   stopifnot("stopopt must be one of 1, 2, 3, or 4" = stopopt %in% c(1L, 2L, 3L, 4L))
   stopifnot("maxit must be a positive integer" = maxit > 0)
   stopifnot("stoptol must be a positive number" = stoptol > 0)
-  stopifnot("grp_idx must be within the range of grp_vec" = max(grp_idx) <= max(grp_vec))
 
   n <- length(b)
   p <- ncol(A)
@@ -186,7 +183,7 @@ sglssnal <- function(
     n = n
   )
 
-  gs <- group_structure(p, grp_vec, grp_idx, pfgroup)
+  gs <- group_structure(p, group, pfgroup)
 
   # Store info for all lambda values
   all_info <- list()

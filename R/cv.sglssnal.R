@@ -29,7 +29,7 @@
 #'   the index of the optimal lambda.
 #' @export
 cv.sglssnal <- function(
-    A, b, grp_vec, grp_idx, alpha = 0.75, lambda = NULL,
+    A, b, group, alpha = 0.75, lambda = NULL,
     nlambda = 100, lambda_min_ratio = 1e-4,
     nfolds = 5, foldid = NULL, printmain = TRUE,
     stoptol = 1e-6, stoptolcv = 1e-4,
@@ -58,7 +58,7 @@ cv.sglssnal <- function(
   }
 
   fit <- sglssnal(
-    A, b, grp_vec, grp_idx,
+    A, b, group,
     lambda = lambda,
     nlambda = nlambda, lambda_min_ratio = lambda_min_ratio,
     alpha = alpha, printmain = printmain, stoptol = stoptol, ...
@@ -124,7 +124,7 @@ cv.sglssnal <- function(
     x0 <- rep(0, p)
 
     result <- sglssnal(
-      Atrain, btrain, grp_vec, grp_idx, lambdas, alpha,
+      Atrain, btrain, group, lambdas, alpha,
       Lip = Lip, y0 = y0, z0 = z0, x0 = x0, printmain = FALSE,
       stoptol = stoptolcv, ...
     )
