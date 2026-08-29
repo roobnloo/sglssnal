@@ -128,7 +128,7 @@ sglssnal <- function(
 
   if (is.null(Lip)) {
     tstartLip <- Sys.time()
-    Lip <- compute_lip(A, n)
+    Lip <- compute_lip(A)
 
     if (printmain) {
       message(sprintf(
