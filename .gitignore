@@ -1,13 +1,57 @@
+# Compiled files
 *.o
 *.so
 *.dll
-scratch/
-.vscode/
-compile_flags.txt
-.Rproj.user
-*.Rproj
-.DS_Store
-*.code-workspace
-.lintr
-.RData
+*.dylib
+
+# R session / data
 .Rhistory
+.Rapp.history
+.RData
+.RDataTmp
+.Ruserdata
+
+# R package build/check artifacts
+/*.tar.gz
+/*.Rcheck/
+*-Ex.R
+doc/
+Meta/
+
+# Vignette build byproducts
+vignettes/*.html
+vignettes/*.pdf
+*_cache/
+/cache/
+*.utf8.md
+*.knit.md
+
+# pkgdown site
+docs/
+
+# Environment / secrets
+.Renviron
+.httr-oauth
+
+# RStudio / editors
+.Rproj.user/
+*.Rproj
+.vscode/
+.idea/
+*.code-workspace
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+Desktop.ini
+*~
+*.swp
+*.swo
+
+# Project-specific
+scratch/
+compile_flags.txt
+.lintr
+context/
+.claude/skills/
+.claude/settings.local.json
