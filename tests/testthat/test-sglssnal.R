@@ -164,3 +164,31 @@ test_that("pfgroup is indexed by sort(unique(group)), not first-appearance order
 
   expect_equal(as.matrix(result_a$x), as.matrix(result_b$x))
 })
+
+test_that("large active-set problem exercises the pcg linear solver path", {
+  # n = 150 observations, p = 9000 predictors, alpha = 0 (pure group lasso,
+  # no l1 thresholding) with a small lambda relative to signal keeps most
+  # coordinates active, driving the internal active-set size (`nnz`, what
+  # conjgrad_linsolver's dispatcher calls `density`) well past the 8000
+  # threshold that routes n=150 to solver 3 (pcg) instead of the dense
+  # direct solve -- see test-conjgrad-linsolver.R for the actual numeric
+  # correctness check of that path; this is an end-to-end smoke test that
+  # it's wired up and doesn't crash/hang through the public API.
+  set.seed(42)
+  n <- 150
+  p <- 9000
+  A <- matrix(rnorm(n * p), nrow = n)
+  bstar <- rnorm(p, sd = 0.5)
+  y <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
+  group <- rep(1:10, each = p / 10)
+
+  result <- sglssnal::sglssnal(
+    A, y, group,
+    lambda = 0.01, alpha = 0, stoptol = 1e-2, maxit = 50,
+    printmain = FALSE, intercept = FALSE, standardize = FALSE
+  )
+
+  expect_true(all(is.finite(result$x@x)))
+  expect_equal(result$info[[1]]$msg, "converged")
+  expect_gt(result$info[[1]]$nnz, 8000)
+})

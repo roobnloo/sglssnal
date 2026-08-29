@@ -218,7 +218,7 @@ List sglssn_conjgrad(const arma::vec &y0, const arma::vec &Aty0,
     int nnz = sum(abs(x) > tol);
     par["nnz"] = nnz;
 
-    List result = conjgrad_linsolver(A, rhs, u, lam1, lam2, gs, nnz, sig);
+    List result = conjgrad_linsolver(A, rhs, u, lam1, lam2, gs, nnz, sig, par);
     arma::vec dy = as<arma::vec>(result["dy"]);
     arma::vec resnrm = as<arma::vec>(result["resnrm"]);
     int solve_ok = as<int>(result["solve_ok"]);
