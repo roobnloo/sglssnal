@@ -10,6 +10,8 @@ Description: An R package implementing the sparse-group lasso method of
     methods based on first-order descent, this method uses second-order information
     and solves the dual optimization problem using semismooth Newtonian optimization.
 License: MIT + file LICENSE
+Depends:
+    R (>= 4.4.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
