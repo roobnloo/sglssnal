@@ -328,6 +328,8 @@ test_that("invalid arguments are rejected with informative errors", {
   expect_error(sglssnal(A, b, group, maxit = 0), "maxit must be a positive integer")
   expect_error(sglssnal(A, b, group, maxit = 3.5), "maxit must be a positive integer")
   expect_error(sglssnal(A, b, group, nlambda = 3.5), "nlambda must be a positive integer")
+  expect_error(sglssnal(A, b, group, maxit = c(5, 10)), "length\\(maxit\\) must be 1")
+  expect_error(sglssnal(A, b, group, nlambda = c(5, 10)), "nlambda must be a positive integer")
   expect_error(sglssnal(A, b, group, stoptol = -1), "stoptol must be a positive number")
   expect_error(
     sglssnal(A, b, group, pfgroup = c(1, 1, 1)),
