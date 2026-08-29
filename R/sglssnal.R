@@ -70,8 +70,19 @@ sglssnal <- function(
     standardize = TRUE, stoptol = 1e-6, stopopt = 2L,
     verbose = 0L, maxit = 5000L, Lip = NULL,
     y0 = NULL, z0 = NULL, x0 = NULL) {
+  # Validate arguments that don't depend on the (possibly auto-generated)
+  # lambda path before touching A/b at all -- lam_max below calls
+  # crossprod(A, b), which throws an uninformative "non-conformable
+  # arguments" error on a shape mismatch instead of the message below.
   stopifnot("length(alpha) must be 1" = length(alpha) == 1)
+  stopifnot("alpha must be in [0, 1]" = alpha >= 0 & alpha <= 1)
   stopifnot("verbose must be one of 0, 1, or 2" = verbose %in% c(0L, 1L, 2L))
+  stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
+  stopifnot("length(group) must be equal to ncol(A)" = length(group) == ncol(A))
+  stopifnot("stopopt must be one of 1, 2, 3, or 4" = stopopt %in% c(1L, 2L, 3L, 4L))
+  stopifnot("maxit must be a positive integer" = maxit > 0)
+  stopifnot("stoptol must be a positive number" = stoptol > 0)
+
   # Generate lambda sequence if lambda is NULL
   if (is.null(lambda)) {
     if (nlambda <= 0) {
@@ -97,12 +108,6 @@ sglssnal <- function(
   nlambda <- length(lambda)
 
   stopifnot("lambda values must be positive" = all(lambda > 0))
-  stopifnot("alpha must be in [0, 1]" = alpha >= 0 & alpha <= 1)
-  stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
-  stopifnot("length(group) must be equal to ncol(A)" = length(group) == ncol(A))
-  stopifnot("stopopt must be one of 1, 2, 3, or 4" = stopopt %in% c(1L, 2L, 3L, 4L))
-  stopifnot("maxit must be a positive integer" = maxit > 0)
-  stopifnot("stoptol must be a positive number" = stoptol > 0)
 
   n <- length(b)
   p <- ncol(A)
