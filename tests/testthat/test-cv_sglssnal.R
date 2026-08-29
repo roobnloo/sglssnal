@@ -15,8 +15,7 @@ test_that("run with custom lambda", {
 
   result <- sglssnal::cv.sglssnal(
     A, ystar, group,
-    lambda = lambda, alpha = 0.5,
-    quietall = TRUE, intercept = FALSE, standardize = FALSE
+    lambda = lambda, alpha = 0.5, intercept = FALSE, standardize = FALSE
   )
   obj <- round(result$obj, 3)
   expect_equal(dim(obj), c(2, length(lambda)))
@@ -42,14 +41,13 @@ test_that("run with default lambda", {
   nlambda <- 10
   result <- sglssnal::cv.sglssnal(
     A, ystar, group,
-    nlambda = nlambda, alpha = 0.5,
-    quietall = TRUE, intercept = FALSE, standardize = FALSE
+    nlambda = nlambda, alpha = 0.5, intercept = FALSE, standardize = FALSE
   )
 
   single <- sglssnal::sglssnal(
     A, ystar, group,
     nlambda = nlambda, alpha = 0.5,
-    intercept = FALSE, standardize = FALSE, printmain = FALSE
+    intercept = FALSE, standardize = FALSE
   )
 
   expect_true(all.equal(result$x, single$x))

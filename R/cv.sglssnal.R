@@ -16,7 +16,6 @@
 #' @param stoptolcv Tolerance for convergence in cross-validation folds.
 #'   May be set to a smaller value than `stoptol` for faster convergence.
 #'   Default is `1e-4`.
-#' @param quietall Suppress all messages.
 #' @param ... Additional arguments passed to [sglssnal()].
 #' @return List of class `cv.sglssanl, sglssnal`, containing the following components:
 #' * `obj`: Matrix containing primal and dual objective values for the solution.
@@ -31,14 +30,11 @@
 cv.sglssnal <- function(
     A, b, group, alpha = 0.75, lambda = NULL,
     nlambda = 100, lambda_min_ratio = 1e-4,
-    nfolds = 5, foldid = NULL, printmain = TRUE,
-    stoptol = 1e-6, stoptolcv = 1e-4,
-    quietall = FALSE, ...) {
+    nfolds = 5, foldid = NULL, verbose = 0L,
+    stoptol = 1e-6, stoptolcv = 1e-4, ...) {
   n <- length(b)
   p <- ncol(A)
-  if (quietall) {
-    printmain <- FALSE
-  }
+  stopifnot("verbose must be one of 0, 1, or 2" = verbose %in% c(0L, 1L, 2L))
   stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
   stopifnot("length(alpha) must be 1" = length(alpha) == 1)
   stopifnot("alpha must be in [0, 1]" = alpha >= 0 & alpha <= 1)
@@ -53,7 +49,7 @@ cv.sglssnal <- function(
   }
 
   # Run sglssnal on the full dataset first to determine lambda path
-  if (!quietall) {
+  if (verbose >= 1L) {
     message("Fitting model on full dataset to determine lambda path...")
   }
 
@@ -61,7 +57,7 @@ cv.sglssnal <- function(
     A, b, group,
     lambda = lambda,
     nlambda = nlambda, lambda_min_ratio = lambda_min_ratio,
-    alpha = alpha, printmain = printmain, stoptol = stoptol, ...
+    alpha = alpha, verbose = verbose, stoptol = stoptol, ...
   )
 
   # Use the lambda sequence from the full model run
@@ -84,7 +80,7 @@ cv.sglssnal <- function(
     nfolds <- max(foldid)
   }
 
-  if (!quietall) {
+  if (verbose >= 1L) {
     message(sprintf(
       "Cross-validating sglssnal over %d lambda values with %d folds...",
       nlambda, nfolds
@@ -109,7 +105,7 @@ cv.sglssnal <- function(
     result <- sglssnal(
       Atrain, btrain, group,
       lambda = lambdas, alpha = alpha,
-      Lip = Lip, y0 = y0, z0 = z0, x0 = x0, printmain = FALSE,
+      Lip = Lip, y0 = y0, z0 = z0, x0 = x0, verbose = verbose,
       stoptol = stoptolcv, ...
     )
 
@@ -118,7 +114,7 @@ cv.sglssnal <- function(
       cv_err[i] <- cv_err[i] + sum(error^2)
     }
 
-    if (!quietall) {
+    if (verbose >= 1L) {
       message(
         sprintf(
           "Fold %d - %3.2fs", t,
@@ -127,7 +123,7 @@ cv.sglssnal <- function(
       )
     }
   }
-  if (!quietall) {
+  if (verbose >= 1L) {
     message(
       sprintf(
         "Total time: %3.2fs",
@@ -137,7 +133,7 @@ cv.sglssnal <- function(
   }
 
   min_lambda_id <- which.min(cv_err)
-  if (!quietall) {
+  if (verbose >= 1L) {
     message(sprintf(
       "Minimum error at lambda index %d (lambda = %g)",
       min_lambda_id, lambdas[min_lambda_id]

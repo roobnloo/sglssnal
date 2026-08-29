@@ -10,7 +10,7 @@ test_that("simple run of sglssnal", {
   group <- rep(1:3, times = c(20, 80, 100))
 
   result <- sglssnal::sglssnal(A, ystar, group, 2,
-    alpha = 0.5, printmain = FALSE, intercept = FALSE, standardize = FALSE
+    alpha = 0.5, intercept = FALSE, standardize = FALSE
   )
   obj <- round(result$obj, 3)
   expect_obj <- matrix(c(19.358, 19.358), nrow = 2)
@@ -32,10 +32,10 @@ test_that("sparse and dense run", {
 
   group <- rep(1:3, times = c(20, 80, 100))
 
-  result_dense <- sglssnal::sglssnal(A, ystar, group, 2, alpha = 0.5, printmain = FALSE)
+  result_dense <- sglssnal::sglssnal(A, ystar, group, 2, alpha = 0.5)
 
   A_sp <- Matrix::Matrix(A, sparse = TRUE)
-  result_sparse <- sglssnal::sglssnal(A_sp, ystar, group, 2, alpha = 0.5, printmain = FALSE)
+  result_sparse <- sglssnal::sglssnal(A_sp, ystar, group, 2, alpha = 0.5)
 
   obj <- sum(abs(round(result_dense$obj - result_sparse$obj, 10)))
   expect_equal(obj, 0)
@@ -57,8 +57,7 @@ test_that("intercept", {
 
   result_intr <- sglssnal::sglssnal(
     A, ystar, group, 1,
-    alpha = 0, pfgroup = pfgroup, stoptol = 1e-8,
-    printmain = FALSE, intercept = TRUE, standardize = FALSE
+    alpha = 0, pfgroup = pfgroup, stoptol = 1e-8, intercept = TRUE, standardize = FALSE
   )
 
   cm <- colMeans(A)
@@ -67,8 +66,7 @@ test_that("intercept", {
 
   result_cent <- sglssnal::sglssnal(
     Ac, yc, group, 1,
-    alpha = 0, pfgroup = pfgroup, stoptol = 1e-8,
-    printmain = FALSE, intercept = FALSE, standardize = FALSE
+    alpha = 0, pfgroup = pfgroup, stoptol = 1e-8, intercept = FALSE, standardize = FALSE
   )
 
   ints <- c(as.numeric(mean(ystar) - cm %*% result_cent$x), result_intr$x0)
@@ -93,8 +91,7 @@ test_that("lambda path", {
   lambda <- seq(0.1, 2, length.out = 10)
 
   result <- sglssnal::sglssnal(A, ystar, group,
-    lambda = lambda, alpha = 0.5,
-    printmain = FALSE, intercept = FALSE, standardize = FALSE
+    lambda = lambda, alpha = 0.5, intercept = FALSE, standardize = FALSE
   )
 
   expect_equal(length(result$lambda), 10)
@@ -112,7 +109,7 @@ test_that("group must match ncol(A)", {
   b <- rnorm(n)
 
   expect_error(
-    sglssnal::sglssnal(A, b, group = 1:(p - 1), printmain = FALSE),
+    sglssnal::sglssnal(A, b, group = 1:(p - 1)),
     "length\\(group\\) must be equal to ncol\\(A\\)"
   )
 })
@@ -126,7 +123,7 @@ test_that("group must not contain NA", {
   group <- c(1:(p - 1), NA)
 
   expect_error(
-    sglssnal::sglssnal(A, b, group = group, printmain = FALSE),
+    sglssnal::sglssnal(A, b, group = group),
     "group must not contain NA"
   )
 })
@@ -154,12 +151,12 @@ test_that("pfgroup is indexed by sort(unique(group)), not first-appearance order
   result_a <- sglssnal::sglssnal(
     A, b, group_a,
     lambda = 1, alpha = 0.5, pfgroup = pfgroup_a,
-    intercept = FALSE, standardize = FALSE, printmain = FALSE
+    intercept = FALSE, standardize = FALSE
   )
   result_b <- sglssnal::sglssnal(
     A, b, group_b,
     lambda = 1, alpha = 0.5, pfgroup = pfgroup_b,
-    intercept = FALSE, standardize = FALSE, printmain = FALSE
+    intercept = FALSE, standardize = FALSE
   )
 
   expect_equal(as.matrix(result_a$x), as.matrix(result_b$x))
@@ -184,8 +181,7 @@ test_that("large active-set problem exercises the pcg linear solver path", {
 
   result <- sglssnal::sglssnal(
     A, y, group,
-    lambda = 0.01, alpha = 0, stoptol = 1e-2, maxit = 50,
-    printmain = FALSE, intercept = FALSE, standardize = FALSE
+    lambda = 0.01, alpha = 0, stoptol = 1e-2, maxit = 50, intercept = FALSE, standardize = FALSE
   )
 
   expect_true(all(is.finite(result$x@x)))
