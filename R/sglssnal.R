@@ -87,6 +87,12 @@ sglssnal <- function(
   stopifnot("alpha must be in [0, 1]" = alpha >= 0 & alpha <= 1)
   stopifnot("verbose must be one of 0, 1, or 2" = verbose %in% c(0L, 1L, 2L))
   stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
+  stopifnot("A must have at least one row and one column" = nrow(A) > 0 && ncol(A) > 0)
+  stopifnot(
+    "A must not contain missing, NaN, or infinite values" =
+      if (inherits(A, "sparseMatrix")) all(is.finite(A@x)) else all(is.finite(A))
+  )
+  stopifnot("b must not contain missing, NaN, or infinite values" = all(is.finite(b)))
   stopifnot("length(group) must be equal to ncol(A)" = length(group) == ncol(A))
   stopifnot("stopopt must be one of 1, 2, 3, or 4" = stopopt %in% c(1L, 2L, 3L, 4L))
   stopifnot("length(maxit) must be 1" = length(maxit) == 1)
