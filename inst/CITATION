@@ -1,0 +1,32 @@
+citHeader("To cite sglssnal in publications, please cite both the package and the paper describing the method it implements:")
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "sglssnal: Sparse-Group Lasso via Semismooth Newton Augmented Lagrangian",
+  author   = person("Robin", "Liu"),
+  year     = format(Sys.Date(), "%Y"),
+  note     = paste("R package version", meta$Version),
+  url      = "https://github.com/roobnloo/sglssnal"
+)
+
+bibentry(
+  bibtype  = "Article",
+  title    = "An efficient Hessian based algorithm for solving large-scale sparse group Lasso problems",
+  author   = c(
+    person("Yangjing", "Zhang"),
+    person("Ning", "Zhang"),
+    person("Defeng", "Sun"),
+    person("Kim-Chuan", "Toh")
+  ),
+  journal  = "Mathematical Programming",
+  year     = "2020",
+  volume   = "179",
+  pages    = "223--263",
+  doi      = "10.1007/s10107-018-1329-6",
+  textVersion = paste(
+    "Zhang, Y., Zhang, N., Sun, D., & Toh, K. C. (2020).",
+    "An efficient Hessian based algorithm for solving large-scale sparse group Lasso problems.",
+    "Mathematical Programming, 179, 223-263.",
+    "doi:10.1007/s10107-018-1329-6"
+  )
+)
