@@ -60,11 +60,19 @@ paths get it, not into a single instantiation.
 checks one of four `stopopt` stopping criteria, accumulates the intercept
 via residual-centering — see the comment block around line 150) calls
 `sglssn_conjgrad` (inner semismooth-Newton loop on the AL subproblem) once
-per outer iteration, which calls `conjgrad_linsolver` (builds the Newton
-system via `mat_ssn` or `mat2_ssn` — dense-direct `arma::solve`, chosen by
-a size/density heuristic, *not* an iterative Krylov solver despite
-`conjgrad`-flavored naming) for the Newton direction and `findstep_impl`
-for the line search. `norm_ops.cpp` (`proximal_l1`, `proximal_l2`,
+per outer iteration, which calls `conjgrad_linsolver` for the Newton
+direction. It picks one of three solver modes based on `n` and the active-set
+size (`nnz` of the current primal iterate, not `A`'s own sparsity): mode 1
+builds a dense `n x n` system via `mat_ssn` and solves it with `arma::solve`;
+mode 2 builds a dense, reduced Woodbury system via `mat2_ssn`; mode 3 (the
+large/dense regime, matching the `conjgrad`-flavored naming) never
+materializes either and instead runs `psqmrGL` — a hand-ported preconditioned
+symmetric QMR, genuinely iterative and matrix-free — against a closure over
+the sparse Woodbury factor `D`. Modes 1 and 2's dense systems aren't a
+sparsity leak from `A`: they're Gram-type objects (`A_dd A_dd^T`, `D^T D`)
+that are generically dense even when `A` itself is sparse, so storing them
+sparse would buy nothing. `findstep_impl` does the line search.
+`norm_ops.cpp` (`proximal_l1`, `proximal_l2`,
 `projection_l2`, `proximal_combo`, `group_l2_norm`, `cardcal`) supplies the
 prox/projection primitives — `proximal_combo` in particular implements the
 paper's Prop. 2.1 decomposition (soft-threshold then per-group ℓ2
@@ -75,8 +83,10 @@ permutation.** The public API takes `group` (length-`p`, `group[j]` is the
 group id of column `j` of `A`, à la `sparsegl`/`gglasso`; ids need not be
 contiguous or sorted). `group_structure()` (`R/group_structure.R`) derives
 the group ordering from `sort(unique(group))`, builds a stable permutation
-(`order(match(group, ug))`) grouping same-id coordinates into contiguous
-blocks, and from that builds a `GroupStruct` (`src/group_struct.h`): a
+(`order(codes, seq_along(codes))`, breaking ties by original position rather
+than relying on `order()`'s own tie-breaking behavior) grouping same-id
+coordinates into contiguous blocks, and from that builds a `GroupStruct`
+(`src/group_struct.h`): a
 sparse permutation matrix `pma` plus group boundaries, consumed directly by
 the C++ solvers via `get_group_subview()`. `pfgroup` (per-group weight) is
 indexed by that same `sort(unique(group))` order, not by first-appearance
@@ -89,10 +99,10 @@ construction — the underlying SSNAL method only supports a true partition
 `sglssnal()` (`R/sglssnal.R`) does intercept handling (mean-center `b`) and
 column standardization *before* calling into C++, then un-scales the
 returned coefficients and adds `b_mean` back to the C++-computed intercept
-term afterward. The Lipschitz constant (`Lip`, needed by the outer loop)
-is computed via `RSpectra::eigs()` on `tcrossprod(A)` — note the branch on
-`getRversion() < "4.4.0"` working around a `tcrossprod` change for old R,
-present in both `sglssnal()` and `cv.sglssnal()`.
+term afterward. The Lipschitz constant (`Lip`, needed by the outer loop) is
+computed by `compute_lip()` (`R/lipschitz.R`), a single unconditional
+`RSpectra::eigs(tcrossprod(A), k = 1, ...)` call used by both `sglssnal()`
+and `cv.sglssnal()` regardless of whether `A` is sparse or dense.
 
 **Lambda path = warm-started loop, not a single call.** `sglssnal()` always
 fits a full descending path of lambda values (auto-generated from
