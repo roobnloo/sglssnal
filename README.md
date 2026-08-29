@@ -23,7 +23,7 @@ Unlike first-order descent based methods which focus on $\mathrm{P}$, the SSNAL 
 
 This package is designed for high-dimensional data with a (non-overlapping) group structure. The timing and accuracy of this method seems to be better than first-order descent methods in a large variety of problems.
 
-The code was initially ported directly from [the original Matlab](https://github.com/YangjingZhang/SparseGroupLasso).
+The code was initially ported directly from [the original Matlab implementation](https://github.com/YangjingZhang/SparseGroupLasso) by Yangjing Zhang, Ning Zhang, Defeng Sun, and Kim-Chuan Toh, the authors of the paper this package implements.
 
 ## Installation
 
