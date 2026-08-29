@@ -335,6 +335,39 @@ test_that("invalid arguments are rejected with informative errors", {
     sglssnal(A, b, group, pfgroup = c(1, 1, 1)),
     "length\\(pfgroup\\) must equal the number of unique groups"
   )
+
+  A_empty <- matrix(nrow = n, ncol = 0)
+  expect_error(
+    sglssnal(A_empty, b, integer(0), lambda = 1),
+    "A must have at least one row and one column"
+  )
+
+  A_na <- A
+  A_na[1, 1] <- NA
+  expect_error(
+    sglssnal(A_na, b, group, lambda = 1),
+    "A must not contain missing, NaN, or infinite values"
+  )
+  A_inf <- A
+  A_inf[1, 1] <- Inf
+  expect_error(
+    sglssnal(A_inf, b, group, lambda = 1),
+    "A must not contain missing, NaN, or infinite values"
+  )
+
+  b_na <- b
+  b_na[1] <- NA
+  expect_error(
+    sglssnal(A, b_na, group, lambda = 1),
+    "b must not contain missing, NaN, or infinite values"
+  )
+
+  A_sp_inf <- Matrix::Matrix(A, sparse = TRUE)
+  A_sp_inf[1, 1] <- Inf
+  expect_error(
+    sglssnal(A_sp_inf, b, group, lambda = 1),
+    "A must not contain missing, NaN, or infinite values"
+  )
 })
 
 test_that("large active-set problem exercises the pcg linear solver path", {
