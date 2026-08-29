@@ -2,7 +2,7 @@ Package: sglssnal
 Title: Sparse-Group Lasso via Semismooth Newton Augmented Lagrangian
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Robin", "Liu", , "r_liu@ucsb.edu", role = c("aut", "cre")),
+    person("Robin", "Liu", , "robin28liu@gmail.com", role = c("aut", "cre")),
     person("Yangjing", "Zhang", role = "ctb",
            comment = "Author of the original MATLAB SSNAL implementation this package ports"))
 Description: An R package implementing the sparse-group lasso method of
@@ -23,7 +23,9 @@ Imports:
 LinkingTo: 
     Rcpp,
     RcppArmadillo
-Suggests: 
+Suggests:
+    spelling,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.0
+Language: en-US
