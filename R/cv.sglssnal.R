@@ -100,24 +100,7 @@ cv.sglssnal <- function(
     Atest <- A[foldidx2, , drop = FALSE]
     btest <- b[foldidx2]
 
-    eigsopt <- list(retvec = FALSE)
-    Lip <- NULL
-    if (getRversion() < as.numeric_version("4.4.0")) {
-      Lip <- RSpectra::eigs(
-        tcrossprod(as.matrix(Atrain)),
-        k = 1, opts = eigsopt, n = n
-      )$values
-    } else if (inherits(Atrain, "sparseMatrix")) {
-      Lip <- RSpectra::eigs(
-        tcrossprod(Atrain),
-        k = 1, which = "LA", opts = eigsopt, n = n
-      )$values
-    } else {
-      Lip <- RSpectra::eigs(
-        tcrossprod(Atrain),
-        k = 1, which = "LM", opts = eigsopt, n = n
-      )$values
-    }
+    Lip <- compute_lip(Atrain, n)
 
     y0 <- rep(0, length(btrain))
     z0 <- rep(0, p)
