@@ -9,13 +9,12 @@ test_that("run with custom lambda", {
   A <- matrix(rnorm(n * p), nrow = n)
   ystar <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
 
-  grp <- 1:p
-  ind <- matrix(c(1, 10, 11, 15, 16, 20), nrow = 2)
+  group <- rep(1:3, times = c(10, 5, 5))
 
   lambda <- seq(3, 0.01, length.out = 10)
 
   result <- sglssnal::cv.sglssnal(
-    A, ystar, grp, ind,
+    A, ystar, group,
     lambda = lambda, alpha = 0.5,
     quietall = TRUE, intercept = FALSE, standardize = FALSE
   )
@@ -38,18 +37,17 @@ test_that("run with default lambda", {
   A <- matrix(rnorm(n * p), nrow = n)
   ystar <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
 
-  grp <- 1:p
-  ind <- matrix(c(1, 10, 11, 15, 16, 20), nrow = 2)
+  group <- rep(1:3, times = c(10, 5, 5))
 
   nlambda <- 10
   result <- sglssnal::cv.sglssnal(
-    A, ystar, grp, ind,
+    A, ystar, group,
     nlambda = nlambda, alpha = 0.5,
     quietall = TRUE, intercept = FALSE, standardize = FALSE
   )
 
   single <- sglssnal::sglssnal(
-    A, ystar, grp, ind,
+    A, ystar, group,
     nlambda = nlambda, alpha = 0.5,
     intercept = FALSE, standardize = FALSE, printmain = FALSE
   )

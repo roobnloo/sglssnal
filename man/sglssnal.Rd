@@ -7,13 +7,12 @@
 sglssnal(
   A,
   b,
-  grp_vec,
-  grp_idx,
+  group,
   lambda = NULL,
   nlambda = 100,
   lambda_min_ratio = 1e-04,
   alpha = 0.05,
-  pfgroup = rep(1, ncol(grp_idx)),
+  pfgroup = rep(1, length(unique(group))),
   intercept = TRUE,
   standardize = TRUE,
   stoptol = 1e-06,
@@ -32,14 +31,10 @@ sglssnal(
 
 \item{b}{\eqn{n} response vector.}
 
-\item{grp_vec}{Vector of indicies of variables in each group.
-If there are \eqn{g} groups and \code{G_i} contains the indices of the
-\code{i}-th group, then \code{grp_vec} should be the concatenated vector
-\code{c(G_1, G_2, ..., G_g)}.}
-
-\item{grp_idx}{\eqn{2 \times g} matrix indexing the groups in \code{grp_vec}.
-\code{grp_vec[grp_idx[1, i]:grp_idx[2, i]]} are the indices of the \code{i}-th
-group.}
+\item{group}{Length-\eqn{p} group-membership vector: \code{group[j]} is the
+group id of column \code{j} of \code{A}. Group ids may be any atomic vector
+(integer, character, or factor) and need not be contiguous or sorted;
+groups are formed from \code{sort(unique(group))}.}
 
 \item{lambda}{Vector of penalty parameters or a single value. If \code{NULL}, a
 path is automatically generated based on \code{norm(t(A) \%*\% b, "I")} and
@@ -54,8 +49,9 @@ Default is 1e-4.}
 \item{alpha}{Determines the relative weight of the \eqn{\ell_1} and
 group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}.}
 
-\item{pfgroup}{Penalty factor for each group in the group lasso.
-Default is a vector of ones, indicating no weighting for any group.}
+\item{pfgroup}{Penalty factor for each group in the group lasso, ordered
+by \code{sort(unique(group))}. Default is a vector of ones, indicating no
+weighting for any group.}
 
 \item{intercept}{Centers mean function at 0 through \eqn{y - \bar{y}}.
 Default is \code{TRUE}.}

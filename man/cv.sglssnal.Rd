@@ -7,8 +7,7 @@
 cv.sglssnal(
   A,
   b,
-  grp_vec,
-  grp_idx,
+  group,
   alpha = 0.75,
   lambda = NULL,
   nlambda = 100,
@@ -27,14 +26,10 @@ cv.sglssnal(
 
 \item{b}{\eqn{n} response vector.}
 
-\item{grp_vec}{Vector of indicies of variables in each group.
-If there are \eqn{g} groups and \code{G_i} contains the indices of the
-\code{i}-th group, then \code{grp_vec} should be the concatenated vector
-\code{c(G_1, G_2, ..., G_g)}.}
-
-\item{grp_idx}{\eqn{2 \times g} matrix indexing the groups in \code{grp_vec}.
-\code{grp_vec[grp_idx[1, i]:grp_idx[2, i]]} are the indices of the \code{i}-th
-group.}
+\item{group}{Length-\eqn{p} group-membership vector: \code{group[j]} is the
+group id of column \code{j} of \code{A}. Group ids may be any atomic vector
+(integer, character, or factor) and need not be contiguous or sorted;
+groups are formed from \code{sort(unique(group))}.}
 
 \item{alpha}{Mixing parameter determining the relative weight of the \eqn{\ell_1} and
 group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}. Default is \code{0.75}.}
