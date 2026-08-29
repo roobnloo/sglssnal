@@ -289,8 +289,10 @@ test_that("user-supplied Lip/y0/z0/x0 warm-start an already-converged solution",
     y0 = fit0$y[, 1], z0 = fit0$z[, 1], x0 = as.numeric(fit0$x[, 1])
   )
 
-  # Starting from an already-converged iterate should take a single
-  # semismooth-Newton outer iteration to re-confirm convergence.
+  # `iter` counts the augmented-Lagrangian outer loop (sglssnal_main), not
+  # the semismooth-Newton inner iterations (tracked separately as
+  # `itersub`). Starting from an already-converged iterate should take a
+  # single outer iteration to re-confirm convergence.
   expect_equal(fit_warm$info[[1]]$iter, 1)
   expect_equal(as.numeric(fit_warm$x), as.numeric(fit0$x), tolerance = 1e-6)
 })
@@ -324,6 +326,8 @@ test_that("invalid arguments are rejected with informative errors", {
   expect_error(sglssnal(A, b, group, alpha = c(0.1, 0.2)), "length\\(alpha\\) must be 1")
   expect_error(sglssnal(A, b, group, lambda = -1), "lambda values must be positive")
   expect_error(sglssnal(A, b, group, maxit = 0), "maxit must be a positive integer")
+  expect_error(sglssnal(A, b, group, maxit = 3.5), "maxit must be a positive integer")
+  expect_error(sglssnal(A, b, group, nlambda = 3.5), "nlambda must be a positive integer")
   expect_error(sglssnal(A, b, group, stoptol = -1), "stoptol must be a positive number")
   expect_error(
     sglssnal(A, b, group, pfgroup = c(1, 1, 1)),
