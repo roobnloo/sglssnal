@@ -70,10 +70,8 @@ sglssnal <- function(
     standardize = TRUE, stoptol = 1e-6, stopopt = 2L,
     verbose = 0L, maxit = 5000L, Lip = NULL,
     y0 = NULL, z0 = NULL, x0 = NULL) {
-  # Validate arguments that don't depend on the (possibly auto-generated)
-  # lambda path before the lambda-generation block below, which calls
-  # crossprod(A, b) -- on a shape mismatch that throws an uninformative
-  # "non-conformable arguments" error instead of the message below.
+  # Validate inputs before crossprod(A, b) below, which errors
+  # uninformatively on a shape mismatch.
   stopifnot("length(alpha) must be 1" = length(alpha) == 1)
   stopifnot("alpha must be in [0, 1]" = alpha >= 0 & alpha <= 1)
   stopifnot("verbose must be one of 0, 1, or 2" = verbose %in% c(0L, 1L, 2L))
