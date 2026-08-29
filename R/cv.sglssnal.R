@@ -100,7 +100,7 @@ cv.sglssnal <- function(
     Atest <- A[foldidx2, , drop = FALSE]
     btest <- b[foldidx2]
 
-    Lip <- compute_lip(Atrain, n)
+    Lip <- compute_lip(Atrain)
 
     y0 <- rep(0, length(btrain))
     z0 <- rep(0, p)
