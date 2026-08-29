@@ -106,6 +106,18 @@ while the dual problem has the form
 where \eqn{\Phi^\ast(z)} denotes the Fenchel conjugate of \eqn{\Phi}.
 The algorithm is based on the work of Zhang et al. (2020).
 }
+\examples{
+set.seed(1)
+n <- 50
+p <- 20
+A <- matrix(rnorm(n * p), n, p)
+bstar <- c(rnorm(5), rep(0, p - 5))
+b <- as.numeric(A \%*\% bstar + rnorm(n, sd = 0.1))
+group <- rep(1:4, each = 5)
+
+fit <- sglssnal(A, b, group, lambda = 0.5, alpha = 0.5)
+coef(fit)
+}
 \references{
 Zhang, Y., Zhang, N., Sun, D., & Toh, K. C. (2020).
 \emph{An efficient Hessian based algorithm for solving large-scale

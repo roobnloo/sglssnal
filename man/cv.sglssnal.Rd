@@ -62,7 +62,7 @@ Default is \code{1e-4}.}
 \item{...}{Additional arguments passed to \code{\link[=sglssnal]{sglssnal()}}.}
 }
 \value{
-List of class \verb{cv.sglssanl, sglssnal}, containing the following components:
+List of class \verb{cv.sglssnal, sglssnal}, containing the following components:
 \itemize{
 \item \code{obj}: Matrix containing primal and dual objective values for the solution.
 \item \code{x}: Matrix of primal variables, with each column corresponding to a lambda.
@@ -77,4 +77,16 @@ the index of the optimal lambda.
 \description{
 Perform cross-validation for the sglssnal algorithm over
 a path of lambda values.
+}
+\examples{
+set.seed(1)
+n <- 50
+p <- 20
+A <- matrix(rnorm(n * p), n, p)
+bstar <- c(rnorm(5), rep(0, p - 5))
+b <- as.numeric(A \%*\% bstar + rnorm(n, sd = 0.1))
+group <- rep(1:4, each = 5)
+
+cvfit <- cv.sglssnal(A, b, group, nlambda = 10, nfolds = 3)
+cvfit$cv_info$cv_lambda_id
 }

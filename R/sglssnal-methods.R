@@ -2,6 +2,16 @@
 #' @param object Fitted object of class `sglssnal`.
 #' @param ... Additional arguments passed to or from other methods.
 #' @return A numeric matrix of estimated coefficients.
+#' @examples
+#' set.seed(1)
+#' n <- 50
+#' p <- 20
+#' A <- matrix(rnorm(n * p), n, p)
+#' b <- rnorm(n)
+#' group <- rep(1:4, each = 5)
+#'
+#' fit <- sglssnal(A, b, group, lambda = 0.5, alpha = 0.5)
+#' coef(fit)
 #' @method coef sglssnal
 #' @export
 coef.sglssnal <- function(object, ...) {
@@ -16,6 +26,16 @@ coef.sglssnal <- function(object, ...) {
 #' @param newdata A matrix of new data.
 #' @param ... Additional arguments passed to or from other methods.
 #' @return A numeric matrix of predictions, with columns corresponding to lambda values.
+#' @examples
+#' set.seed(1)
+#' n <- 50
+#' p <- 20
+#' A <- matrix(rnorm(n * p), n, p)
+#' b <- rnorm(n)
+#' group <- rep(1:4, each = 5)
+#'
+#' fit <- sglssnal(A, b, group, lambda = 0.5, alpha = 0.5)
+#' predict(fit, A)
 #' @method predict sglssnal
 #' @export
 predict.sglssnal <- function(object, newdata, ...) {
