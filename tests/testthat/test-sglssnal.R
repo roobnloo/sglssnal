@@ -162,6 +162,181 @@ test_that("pfgroup is indexed by sort(unique(group)), not first-appearance order
   expect_equal(as.matrix(result_a$x), as.matrix(result_b$x))
 })
 
+test_that("standardize = TRUE matches manually standardizing and unscaling", {
+  set.seed(1)
+  n <- 100
+  p <- 20
+
+  A <- matrix(rnorm(n * p), n, p)
+  bstar <- c(rnorm(5), rep(0, p - 5))
+  b <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
+  group <- rep(1:4, each = 5)
+
+  fit_std <- sglssnal(A, b, group,
+    lambda = 1, alpha = 0.5, intercept = FALSE, standardize = TRUE
+  )
+
+  # standardize = TRUE fits on A scaled to unit column norm, then unscales
+  # the coefficients back to A's original units -- replicate that manually
+  # with standardize = FALSE and check they agree.
+  A_sd <- sqrt(colSums(A^2))
+  A_scaled <- sweep(A, 2, A_sd, "/")
+  fit_manual <- sglssnal(A_scaled, b, group,
+    lambda = 1, alpha = 0.5, intercept = FALSE, standardize = FALSE
+  )
+
+  expect_equal(as.numeric(fit_std$x), as.numeric(fit_manual$x) / A_sd, tolerance = 1e-6)
+})
+
+test_that("pfgroup weights shrink a more heavily penalized group harder", {
+  set.seed(3)
+  n <- 100
+  p <- 10
+
+  A <- matrix(rnorm(n * p), n, p)
+  bstar <- rep(1, p)
+  b <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
+  group <- rep(1:2, each = 5)
+
+  # Both groups carry identical true signal, so with equal weights their
+  # fitted group norms should be nearly equal; penalizing group 2 harder
+  # should shrink it well below group 1's norm.
+  fit_equal <- sglssnal(A, b, group,
+    lambda = 5, alpha = 0, pfgroup = c(1, 1),
+    intercept = FALSE, standardize = FALSE
+  )
+  fit_weighted <- sglssnal(A, b, group,
+    lambda = 5, alpha = 0, pfgroup = c(1, 8),
+    intercept = FALSE, standardize = FALSE
+  )
+
+  norm1_equal <- sqrt(sum(fit_equal$x[1:5, 1]^2))
+  norm2_equal <- sqrt(sum(fit_equal$x[6:10, 1]^2))
+  norm1_weighted <- sqrt(sum(fit_weighted$x[1:5, 1]^2))
+  norm2_weighted <- sqrt(sum(fit_weighted$x[6:10, 1]^2))
+
+  expect_equal(norm1_equal, norm2_equal, tolerance = 0.05)
+  expect_lt(norm2_weighted, norm2_equal)
+  expect_gt(norm1_weighted, norm2_weighted)
+})
+
+test_that("alpha = 1 (pure lasso) matches the closed-form soft-threshold solution", {
+  # With alpha = 1, lambda2 = 0, so the group penalty vanishes and this
+  # reduces to plain lasso regardless of grouping. For an orthonormal
+  # design (A'A = I), the lasso solution has the closed form
+  # soft_threshold(A'b, lambda1) -- a strong, tuning-free correctness check.
+  set.seed(7)
+  n <- 50
+  p <- 10
+
+  A <- qr.Q(qr(matrix(rnorm(n * p), n, p)))
+  bstar <- c(2, -1.5, rep(0, p - 2))
+  b <- as.numeric(A %*% bstar + rnorm(n, sd = 0.05))
+  group <- rep(1:5, each = 2)
+  lambda_val <- 0.3
+
+  fit <- sglssnal(A, b, group,
+    lambda = lambda_val, alpha = 1,
+    intercept = FALSE, standardize = FALSE, stoptol = 1e-10
+  )
+
+  z <- as.numeric(crossprod(A, b))
+  expected <- sign(z) * pmax(abs(z) - lambda_val, 0)
+
+  expect_equal(as.numeric(fit$x), expected, tolerance = 1e-6)
+})
+
+test_that("stopopt variants 1, 3, 4 agree with the default (2)", {
+  set.seed(11)
+  n <- 80
+  p <- 15
+
+  A <- matrix(rnorm(n * p), n, p)
+  bstar <- c(rnorm(5), rep(0, p - 5))
+  b <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
+  group <- rep(1:3, each = 5)
+
+  base <- sglssnal(A, b, group,
+    lambda = 0.5, alpha = 0.5, stopopt = 2L,
+    intercept = FALSE, standardize = FALSE, stoptol = 1e-8
+  )
+
+  for (so in c(1L, 3L, 4L)) {
+    fit <- sglssnal(A, b, group,
+      lambda = 0.5, alpha = 0.5, stopopt = so,
+      intercept = FALSE, standardize = FALSE, stoptol = 1e-8
+    )
+    expect_equal(as.numeric(fit$x), as.numeric(base$x), tolerance = 1e-6)
+  }
+})
+
+test_that("user-supplied Lip/y0/z0/x0 warm-start an already-converged solution", {
+  set.seed(21)
+  n <- 60
+  p <- 10
+
+  A <- matrix(rnorm(n * p), n, p)
+  bstar <- c(rnorm(3), rep(0, p - 3))
+  b <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
+  group <- rep(1:2, each = 5)
+
+  fit0 <- sglssnal(A, b, group,
+    lambda = 0.5, alpha = 0.5, intercept = FALSE, standardize = FALSE
+  )
+  fit_warm <- sglssnal(A, b, group,
+    lambda = 0.5, alpha = 0.5, intercept = FALSE, standardize = FALSE,
+    Lip = sglssnal:::compute_lip(A),
+    y0 = fit0$y[, 1], z0 = fit0$z[, 1], x0 = as.numeric(fit0$x[, 1])
+  )
+
+  # `iter` counts the augmented-Lagrangian outer loop (sglssnal_main), not
+  # the semismooth-Newton inner iterations (tracked separately as
+  # `itersub`). Starting from an already-converged iterate should take a
+  # single outer iteration to re-confirm convergence.
+  expect_equal(fit_warm$info[[1]]$iter, 1)
+  expect_equal(as.numeric(fit_warm$x), as.numeric(fit0$x), tolerance = 1e-6)
+})
+
+test_that("mismatched y0/z0/x0 dimensions raise a clear error", {
+  set.seed(21)
+  n <- 60
+  p <- 10
+  A <- matrix(rnorm(n * p), n, p)
+  b <- rnorm(n)
+  group <- rep(1:2, each = 5)
+
+  expect_error(
+    sglssnal(A, b, group, y0 = rep(0, n), z0 = rep(0, p), x0 = rep(0, p - 1)),
+    "y0, z0, and x0 must have dimensions"
+  )
+})
+
+test_that("invalid arguments are rejected with informative errors", {
+  set.seed(21)
+  n <- 60
+  p <- 10
+  A <- matrix(rnorm(n * p), n, p)
+  b <- rnorm(n)
+  group <- rep(1:2, each = 5)
+
+  expect_error(sglssnal(A, b, group, verbose = 9L), "verbose must be one of 0, 1, or 2")
+  expect_error(sglssnal(A, b, group, stopopt = 5L), "stopopt must be one of 1, 2, 3, or 4")
+  expect_error(sglssnal(A, b[-1], group), "nrow\\(A\\) must be equal to length\\(b\\)")
+  expect_error(sglssnal(A, b, group, alpha = 1.5), "alpha must be in \\[0, 1\\]")
+  expect_error(sglssnal(A, b, group, alpha = c(0.1, 0.2)), "length\\(alpha\\) must be 1")
+  expect_error(sglssnal(A, b, group, lambda = -1), "lambda values must be positive")
+  expect_error(sglssnal(A, b, group, maxit = 0), "maxit must be a positive integer")
+  expect_error(sglssnal(A, b, group, maxit = 3.5), "maxit must be a positive integer")
+  expect_error(sglssnal(A, b, group, nlambda = 3.5), "nlambda must be a positive integer")
+  expect_error(sglssnal(A, b, group, maxit = c(5, 10)), "length\\(maxit\\) must be 1")
+  expect_error(sglssnal(A, b, group, nlambda = c(5, 10)), "nlambda must be a positive integer")
+  expect_error(sglssnal(A, b, group, stoptol = -1), "stoptol must be a positive number")
+  expect_error(
+    sglssnal(A, b, group, pfgroup = c(1, 1, 1)),
+    "length\\(pfgroup\\) must equal the number of unique groups"
+  )
+})
+
 test_that("large active-set problem exercises the pcg linear solver path", {
   # n = 150 observations, p = 9000 predictors, alpha = 0 (pure group lasso,
   # no l1 thresholding) with a small lambda relative to signal keeps most
