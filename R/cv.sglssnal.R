@@ -17,7 +17,7 @@
 #'   May be set to a smaller value than `stoptol` for faster convergence.
 #'   Default is `1e-4`.
 #' @param ... Additional arguments passed to [sglssnal()].
-#' @return List of class `cv.sglssanl, sglssnal`, containing the following components:
+#' @return List of class `cv.sglssnal, sglssnal`, containing the following components:
 #' * `obj`: Matrix containing primal and dual objective values for the solution.
 #' * `x`: Matrix of primal variables, with each column corresponding to a lambda.
 #' * `x0`: Vector of intercept values for each lambda.
@@ -26,6 +26,17 @@
 #' * `info`: List containing information about the optimization process.
 #' * `cv_info`: List containing the lambdas, cross-validation errors, and
 #'   the index of the optimal lambda.
+#' @examples
+#' set.seed(1)
+#' n <- 50
+#' p <- 20
+#' A <- matrix(rnorm(n * p), n, p)
+#' bstar <- c(rnorm(5), rep(0, p - 5))
+#' b <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
+#' group <- rep(1:4, each = 5)
+#'
+#' cvfit <- cv.sglssnal(A, b, group, nlambda = 10, nfolds = 3)
+#' cvfit$cv_info$cv_lambda_id
 #' @export
 cv.sglssnal <- function(
     A, b, group, alpha = 0.75, lambda = NULL,

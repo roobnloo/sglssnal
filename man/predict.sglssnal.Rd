@@ -19,3 +19,14 @@ A numeric matrix of predictions, with columns corresponding to lambda values.
 \description{
 Predict method for \code{sglssnal} objects
 }
+\examples{
+set.seed(1)
+n <- 50
+p <- 20
+A <- matrix(rnorm(n * p), n, p)
+b <- rnorm(n)
+group <- rep(1:4, each = 5)
+
+fit <- sglssnal(A, b, group, lambda = 0.5, alpha = 0.5)
+predict(fit, A)
+}

@@ -17,3 +17,14 @@ A numeric matrix of estimated coefficients.
 \description{
 Extract estimated coefficients from a \code{sglssnal} object
 }
+\examples{
+set.seed(1)
+n <- 50
+p <- 20
+A <- matrix(rnorm(n * p), n, p)
+b <- rnorm(n)
+group <- rep(1:4, each = 5)
+
+fit <- sglssnal(A, b, group, lambda = 0.5, alpha = 0.5)
+coef(fit)
+}
