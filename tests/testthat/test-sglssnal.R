@@ -117,6 +117,20 @@ test_that("group must match ncol(A)", {
   )
 })
 
+test_that("group must not contain NA", {
+  set.seed(231415)
+  n <- 20
+  p <- 10
+  A <- matrix(rnorm(n * p), nrow = n)
+  b <- rnorm(n)
+  group <- c(1:(p - 1), NA)
+
+  expect_error(
+    sglssnal::sglssnal(A, b, group = group, printmain = FALSE),
+    "group must not contain NA"
+  )
+})
+
 test_that("pfgroup is indexed by sort(unique(group)), not first-appearance order", {
   set.seed(231415)
   n <- 50

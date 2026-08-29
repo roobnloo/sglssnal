@@ -124,7 +124,8 @@ cv.sglssnal <- function(
     x0 <- rep(0, p)
 
     result <- sglssnal(
-      Atrain, btrain, group, lambdas, alpha,
+      Atrain, btrain, group,
+      lambda = lambdas, alpha = alpha,
       Lip = Lip, y0 = y0, z0 = z0, x0 = x0, printmain = FALSE,
       stoptol = stoptolcv, ...
     )

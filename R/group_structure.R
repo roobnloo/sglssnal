@@ -11,6 +11,7 @@
 #' @noRd
 group_structure <- function(n, group, pfgroup) {
   stopifnot("length(group) must equal n" = length(group) == n)
+  stopifnot("group must not contain NA" = !anyNA(group))
   ug <- sort(unique(group))
   g <- length(ug)
   stopifnot(
@@ -18,10 +19,11 @@ group_structure <- function(n, group, pfgroup) {
       length(pfgroup) == g
   )
 
-  # Integer group code per coordinate (1..g), and a stable sort by code that
-  # preserves each group's original relative member order.
+  # Integer group code per coordinate (1..g). Sort by code, breaking ties by
+  # original position, so each group's member order is preserved regardless
+  # of which order() method gets selected internally.
   codes <- match(group, ug)
-  ord <- order(codes)
+  ord <- order(codes, seq_along(codes))
   sizes <- tabulate(codes, nbins = g)
 
   gs <- list()
