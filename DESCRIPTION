@@ -19,7 +19,8 @@ Imports:
     Matrix,
     Rcpp,
     RSpectra,
-    methods
+    methods,
+    utils
 LinkingTo: 
     Rcpp,
     RcppArmadillo

@@ -17,8 +17,7 @@ sglssnal(
   standardize = TRUE,
   stoptol = 1e-06,
   stopopt = 2L,
-  printmain = TRUE,
-  printsub = FALSE,
+  verbose = 0L,
   maxit = 5000L,
   Lip = NULL,
   y0 = NULL,
@@ -65,9 +64,11 @@ Default is \code{TRUE}.}
 2: KKT conditions, 3: dual feasibility and relative duality gap,
 4: dual feasibility and absolute duality gap. Default is \code{2L}.}
 
-\item{printmain}{Print progress in main loop. Default is \code{TRUE}.}
-
-\item{printsub}{Print progress in subproblem. Default is \code{FALSE}.}
+\item{verbose}{How much to print to the console: \code{0} (default) shows a
+compact text progress bar tracking the lambda path; \code{1} prints full
+per-lambda SSNAL diagnostics (objective, feasibility, iteration counts,
+...) instead of the progress bar; \code{2} additionally prints the inner
+semismooth-Newton subproblem's iteration trace.}
 
 \item{maxit}{Maximum number of iterations. Default is \code{5000L}.}
 

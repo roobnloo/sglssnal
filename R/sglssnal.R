@@ -36,8 +36,11 @@
 #' @param stopopt Stopping criteria. 1: relative duality gap and feasibility,
 #'   2: KKT conditions, 3: dual feasibility and relative duality gap,
 #'   4: dual feasibility and absolute duality gap. Default is `2L`.
-#' @param printmain Print progress in main loop. Default is `TRUE`.
-#' @param printsub Print progress in subproblem. Default is `FALSE`.
+#' @param verbose How much to print to the console: `0` (default) shows a
+#'   compact text progress bar tracking the lambda path; `1` prints full
+#'   per-lambda SSNAL diagnostics (objective, feasibility, iteration counts,
+#'   ...) instead of the progress bar; `2` additionally prints the inner
+#'   semismooth-Newton subproblem's iteration trace.
 #' @param maxit Maximum number of iterations. Default is `5000L`.
 #' @param Lip Lipschitz constant for the step size.
 #'   Automatically computed as the maximum eigenvalue of AA' if `NULL`.
@@ -65,9 +68,10 @@ sglssnal <- function(
     nlambda = 100, lambda_min_ratio = 1e-4, alpha = 0.05,
     pfgroup = rep(1, length(unique(group))), intercept = TRUE,
     standardize = TRUE, stoptol = 1e-6, stopopt = 2L,
-    printmain = TRUE, printsub = FALSE, maxit = 5000L, Lip = NULL,
+    verbose = 0L, maxit = 5000L, Lip = NULL,
     y0 = NULL, z0 = NULL, x0 = NULL) {
   stopifnot("length(alpha) must be 1" = length(alpha) == 1)
+  stopifnot("verbose must be one of 0, 1, or 2" = verbose %in% c(0L, 1L, 2L))
   # Generate lambda sequence if lambda is NULL
   if (is.null(lambda)) {
     if (nlambda <= 0) {
@@ -130,7 +134,7 @@ sglssnal <- function(
     tstartLip <- Sys.time()
     Lip <- compute_lip(A)
 
-    if (printmain) {
+    if (verbose >= 1L) {
       message(sprintf(
         "\n Lip = %3.2e, time = %3.2f",
         Lip, as.numeric(difftime(Sys.time(), tstartLip, units = "secs"))
@@ -161,8 +165,8 @@ sglssnal <- function(
     Lip = Lip,
     maxit = maxit,
     stopopt = stopopt,
-    printmain = printmain,
-    printsub = printsub,
+    printmain = verbose >= 1L,
+    printsub = verbose >= 2L,
     p = p,
     n = n
   )
@@ -176,9 +180,15 @@ sglssnal <- function(
     dimnames = list(c("primal objective", "dual objective"), NULL)
   )
 
+  pb <- NULL
+  if (verbose == 0L) {
+    pb <- utils::txtProgressBar(min = 0, max = nlambda, style = 3)
+    on.exit(close(pb), add = TRUE)
+  }
+
   # Loop through lambda values
   for (i in 1:nlambda) {
-    if (printmain) {
+    if (verbose >= 1L) {
       message(sprintf("\nFitting model for lambda = %g (%d/%d)", lambda[i], i, nlambda))
     }
 
@@ -246,7 +256,7 @@ sglssnal <- function(
       mse = mean((as.numeric(b - A %*% x))^2)
     )
 
-    if (printmain) {
+    if (verbose >= 1L) {
       message("\n****************************************")
       message(sprintf(" SSNAL       : %s", msg))
       message(sprintf(" iteration   : %d", iter))
@@ -258,6 +268,8 @@ sglssnal <- function(
       message(sprintf(" dualfeas    : %3.2e", dualfeas))
       message(sprintf(" eta         : %3.2e", info_main$eta))
       message(sprintf(" nnz         : %d", runhist_main$nnz))
+    } else {
+      utils::setTxtProgressBar(pb, i)
     }
   }
 
