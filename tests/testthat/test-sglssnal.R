@@ -396,3 +396,39 @@ test_that("large active-set problem exercises the pcg linear solver path", {
   expect_equal(result$info[[1]]$msg, "converged")
   expect_gt(result$info[[1]]$nnz, 8000)
 })
+
+test_that("auto lambda path is unaffected by a large constant offset in b", {
+  # With intercept = TRUE, adding a constant to b must not change the fit
+  # at all -- the intercept absorbs it entirely.
+  set.seed(1)
+  n <- 100
+  p <- 20
+  A <- matrix(rnorm(n * p), n, p)
+  bstar <- c(rnorm(5), rep(0, p - 5))
+  b <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
+  group <- rep(1:4, each = 5)
+
+  fit1 <- sglssnal(A, b, group, nlambda = 10, alpha = 0.5)
+  fit2 <- sglssnal(A, b + 1000, group, nlambda = 10, alpha = 0.5)
+
+  expect_equal(fit1$lambda, fit2$lambda, tolerance = 1e-6)
+  expect_equal(as.matrix(fit1$x), as.matrix(fit2$x), tolerance = 1e-6)
+  expect_false(all(as.matrix(fit1$x) == 0))
+})
+
+test_that("auto lambda path works for sparse A without Matrix attached", {
+  # sglssnal() must work for sparse A even when Matrix is only imported,
+  # not attached via library(Matrix).
+  skip_if("Matrix" %in% .packages(), "Matrix must not be attached for this check")
+
+  set.seed(1)
+  n <- 50
+  p <- 20
+  A <- Matrix::rsparsematrix(n, p, density = 0.3, rand.x = rnorm)
+  bstar <- c(rnorm(5), rep(0, p - 5))
+  b <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
+  group <- rep(1:4, each = 5)
+
+  fit <- sglssnal(A, b, group, nlambda = 10, alpha = 0.5)
+  expect_equal(dim(fit$x), c(p, 10))
+})
