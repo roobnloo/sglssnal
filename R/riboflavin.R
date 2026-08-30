@@ -16,7 +16,10 @@
 #'   \item{group}{Length-932 character vector giving the KEGG pathway ID
 #'     (e.g. `"bsu00740"`, without the `"path:"` prefix) for each column
 #'     of `A`, suitable for the `group` argument of [sglssnal()]. Pathway
-#'     sizes range from 73 genes (ABC transporters) down to singletons.}
+#'     sizes range from 73 genes (ABC transporters) down to singletons.
+#'     About two-thirds of these genes actually belong to more than one
+#'     KEGG pathway; since `group` requires a strict partition, each was
+#'     assigned to only its first-listed pathway.}
 #' }
 #' @source Data: Bühlmann, P., Kalisch, M. and Meier, L. (2014).
 #'   High-dimensional statistics with a view towards applications in

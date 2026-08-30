@@ -16,7 +16,10 @@ production rate.}
 \item{group}{Length-932 character vector giving the KEGG pathway ID
 (e.g. \code{"bsu00740"}, without the \code{"path:"} prefix) for each column
 of \code{A}, suitable for the \code{group} argument of \code{\link[=sglssnal]{sglssnal()}}. Pathway
-sizes range from 73 genes (ABC transporters) down to singletons.}
+sizes range from 73 genes (ABC transporters) down to singletons.
+About two-thirds of these genes actually belong to more than one
+KEGG pathway; since \code{group} requires a strict partition, each was
+assigned to only its first-listed pathway.}
 }
 }
 \source{
