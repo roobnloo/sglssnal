@@ -62,6 +62,8 @@ cv.sglssnal <- function(
   # Run sglssnal on the full dataset first to determine lambda path
   if (verbose >= 1L) {
     message("Fitting model on full dataset to determine lambda path...")
+  } else {
+    message("Establishing lambda path on full dataset...")
   }
 
   fit <- sglssnal(
@@ -112,6 +114,10 @@ cv.sglssnal <- function(
     y0 <- rep(0, length(btrain))
     z0 <- rep(0, p)
     x0 <- rep(0, p)
+
+    if (verbose == 0L) {
+      message(sprintf("Fold %d of %d...", t, nfolds))
+    }
 
     result <- sglssnal(
       Atrain, btrain, group,

@@ -211,6 +211,9 @@ sglssnal <- function(
 
   pb <- NULL
   if (verbose == 0L) {
+    message(sprintf(
+      "Fitting %d lambda value%s...", nlambda, if (nlambda != 1) "s" else ""
+    ))
     pb <- utils::txtProgressBar(min = 0, max = nlambda, style = 3)
     on.exit(close(pb), add = TRUE)
   }
