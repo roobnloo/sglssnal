@@ -36,9 +36,11 @@ group id of column \code{j} of \code{A}. Group ids may be any atomic vector
 groups are formed from \code{sort(unique(group))}.}
 
 \item{lambda}{Vector of penalty parameters or a single value. If \code{NULL}, a
-path is automatically generated based on \code{norm(t(A) \%*\% b, "I")} and
-\code{lambda_min_ratio}. The path is fit using warm starts from larger to smaller
-lambda values.}
+path is automatically generated from the largest lambda at which the
+all-zero solution is optimal (computed on the centered/standardized \code{A}
+and \code{b}, matching \code{intercept}/\code{standardize}) down to that value times
+\code{lambda_min_ratio}. The path is fit using warm starts from larger to
+smaller lambda values.}
 
 \item{nlambda}{Number of lambda values to use when \code{lambda} is \code{NULL}. Default is 100.}
 

@@ -17,9 +17,11 @@
 #'   (integer, character, or factor) and need not be contiguous or sorted;
 #'   groups are formed from `sort(unique(group))`.
 #' @param lambda Vector of penalty parameters or a single value. If `NULL`, a
-#'   path is automatically generated based on `norm(t(A) %*% b, "I")` and
-#'   `lambda_min_ratio`. The path is fit using warm starts from larger to smaller
-#'   lambda values.
+#'   path is automatically generated from the largest lambda at which the
+#'   all-zero solution is optimal (computed on the centered/standardized `A`
+#'   and `b`, matching `intercept`/`standardize`) down to that value times
+#'   `lambda_min_ratio`. The path is fit using warm starts from larger to
+#'   smaller lambda values.
 #' @param alpha Determines the relative weight of the \eqn{\ell_1} and
 #'   group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}.
 #' @param nlambda Number of lambda values to use when `lambda` is `NULL`. Default is 100.
@@ -99,42 +101,12 @@ sglssnal <- function(
   stopifnot("maxit must be a positive integer" = maxit > 0 & maxit == round(maxit))
   stopifnot("stoptol must be a positive number" = stoptol > 0)
 
-  # Generate lambda sequence if lambda is NULL
-  if (is.null(lambda)) {
-    if (length(nlambda) != 1 || nlambda <= 0 || nlambda != round(nlambda)) {
-      stop("nlambda must be a positive integer")
-    }
-    alpha_min <- alpha
-    if (alpha_min == 0) {
-      alpha_min <- 1e-2
-    }
-    # This choice of lam_max ensures a sparse lasso solution exists on the path
-    lam_max <- norm(crossprod(A, b), "I") / alpha_min
-    lambda <- lam_max *
-      exp(seq(log(1), log(lambda_min_ratio), length.out = nlambda))
-  }
-
-  # Convert lambda to a vector if it's a single value
-  if (length(lambda) == 1) {
-    lambda <- c(lambda)
-  }
-
-  # Sort lambda in descending order for the regularization path
-  lambda <- sort(lambda, decreasing = TRUE)
-  nlambda <- length(lambda)
-
-  stopifnot("lambda values must be positive" = all(lambda > 0))
-
   n <- length(b)
   p <- ncol(A)
 
-  # Prepare matrices for storing results
-  x_mat <- matrix(0, nrow = p, ncol = nlambda)
-  x0_vec <- numeric(nlambda)
-  y_mat <- matrix(0, nrow = n, ncol = nlambda)
-  z_mat <- matrix(0, nrow = p, ncol = nlambda)
-
-  # Preprocessing steps
+  # Preprocessing steps. Must happen before lambda-path generation below,
+  # since lam_max is derived from crossprod(A, b) and needs to see the
+  # same centered b / standardized A the solver actually fits.
   b_mean <- mean(b)
   A_sd <- sqrt(Matrix::colSums(A^2))
   A_sd[A_sd < sqrt(.Machine$double.eps)] <- 1
@@ -150,6 +122,40 @@ sglssnal <- function(
       A <- sweep(A, 2, A_sd, "/")
     }
   }
+
+  # Generate lambda sequence if lambda is NULL
+  if (is.null(lambda)) {
+    if (length(nlambda) != 1 || nlambda <= 0 || nlambda != round(nlambda)) {
+      stop("nlambda must be a positive integer")
+    }
+    alpha_min <- alpha
+    if (alpha_min == 0) {
+      alpha_min <- 1e-2
+    }
+    # This choice of lam_max ensures a sparse lasso solution exists on the path.
+    # Uses Matrix::norm() rather than base norm(), since crossprod(A, b) may
+    # be a Matrix-package S4 object for sparse A.
+    lam_max <- Matrix::norm(crossprod(A, b), "I") / alpha_min
+    lambda <- lam_max *
+      exp(seq(log(1), log(lambda_min_ratio), length.out = nlambda))
+  }
+
+  # Convert lambda to a vector if it's a single value
+  if (length(lambda) == 1) {
+    lambda <- c(lambda)
+  }
+
+  # Sort lambda in descending order for the regularization path
+  lambda <- sort(lambda, decreasing = TRUE)
+  nlambda <- length(lambda)
+
+  stopifnot("lambda values must be positive" = all(lambda > 0))
+
+  # Prepare matrices for storing results
+  x_mat <- matrix(0, nrow = p, ncol = nlambda)
+  x0_vec <- numeric(nlambda)
+  y_mat <- matrix(0, nrow = n, ncol = nlambda)
+  z_mat <- matrix(0, nrow = p, ncol = nlambda)
 
   if (is.null(Lip)) {
     tstartLip <- Sys.time()
