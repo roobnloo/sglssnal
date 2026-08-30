@@ -117,7 +117,9 @@ sglssnal <- function(
 
   if (standardize) {
     if (inherits(A, "sparseMatrix")) {
+      A_colnames <- colnames(A)
       A <- A %*% Matrix::Diagonal(x = 1 / A_sd)
+      colnames(A) <- A_colnames
     } else {
       A <- sweep(A, 2, A_sd, "/")
     }
