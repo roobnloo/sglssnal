@@ -48,7 +48,7 @@ smaller lambda values.}
 Default is 1e-4.}
 
 \item{alpha}{Determines the relative weight of the \eqn{\ell_1} and
-group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}.}
+group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}. Default is \code{0.05}.}
 
 \item{pfgroup}{Penalty factor for each group in the group lasso, ordered
 by \code{sort(unique(group))}. Default is a vector of ones, indicating no
@@ -99,12 +99,16 @@ List of class \code{sglssnal} containing the following components:
 Fits a sparse-group lasso model using
 second-order information to solve the dual problem.
 The penalty function is given by
-\deqn{\Phi(x) = \lambda_1 ||x||_1 + \lambda_2 \sum_{i=1}^g w_i ||x_{G_i}||_2}
-where \eqn{G_i} is the \eqn{i}-th group and \eqn{w_i} its penalty factor.
+\deqn{\Phi(x) = \alpha\lambda ||x||_1 + (1-\alpha)\lambda \sum_{i=1}^g w_i ||x_{G_i}||_2}
+where \eqn{G_i} is the \eqn{i}-th group, \eqn{w_i} its penalty factor,
+and \eqn{\alpha \in [0, 1]} mixes the \eqn{\ell_1} and group \eqn{\ell_2} penalties.
 The primal problem is given by
 \deqn{\min_{x \in \mathbb{R}^p}\; \frac{1}{2} ||Ax - b||_2^2 + \Phi(x)}
 while the dual problem has the form
-\deqn{\max_{y \in \mathbb{R}^n, z \in \mathbb{R}^p}\; -\langle b, y\rangle - \frac{1}{2}||y||_2^2 - \Phi^\ast(z) \text{s.t.} A^\top y + z = 0}
+\deqn{\begin{matrix}
+  \max_{y \in \mathbb{R}^n, z \in \mathbb{R}^p}\; -\langle b, y\rangle - \frac{1}{2}||y||_2^2 - \Phi^\ast(z) \\
+  \text{s.t.}\; A^\top y + z = 0
+  \end{matrix}}
 where \eqn{\Phi^\ast(z)} denotes the Fenchel conjugate of \eqn{\Phi}.
 The algorithm is based on the work of Zhang et al. (2020).
 }
