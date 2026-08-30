@@ -432,3 +432,17 @@ test_that("auto lambda path works for sparse A without Matrix attached", {
   fit <- sglssnal(A, b, group, nlambda = 10, alpha = 0.5)
   expect_equal(dim(fit$x), c(p, 10))
 })
+
+test_that("standardize = TRUE preserves A's column names for sparse A", {
+  set.seed(1)
+  n <- 50
+  p <- 20
+  A <- Matrix::rsparsematrix(n, p, density = 0.3, rand.x = rnorm)
+  colnames(A) <- paste0("feature", seq_len(p))
+  bstar <- c(rnorm(5), rep(0, p - 5))
+  b <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
+  group <- rep(1:4, each = 5)
+
+  fit <- sglssnal(A, b, group, lambda = 0.5, standardize = TRUE)
+  expect_equal(rownames(fit$x), colnames(A))
+})
