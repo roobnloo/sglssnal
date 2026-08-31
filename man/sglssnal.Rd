@@ -12,7 +12,7 @@ sglssnal(
   nlambda = 100,
   lambda_min_ratio = 1e-04,
   alpha = 0.05,
-  pfgroup = rep(1, length(unique(group))),
+  pfgroup = sqrt(as.numeric(table(group))),
   intercept = TRUE,
   standardize = TRUE,
   stoptol = 1e-06,
@@ -37,8 +37,7 @@ groups are formed from \code{sort(unique(group))}.}
 
 \item{lambda}{Vector of penalty parameters or a single value. If \code{NULL}, a
 path is automatically generated from the largest lambda at which the
-all-zero solution is optimal (computed on the centered/standardized \code{A}
-and \code{b}, matching \code{intercept}/\code{standardize}) down to that value times
+all-zero solution is optimal down to that value times
 \code{lambda_min_ratio}. The path is fit using warm starts from larger to
 smaller lambda values.}
 
@@ -51,8 +50,8 @@ Default is 1e-4.}
 group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}. Default is \code{0.05}.}
 
 \item{pfgroup}{Penalty factor for each group in the group lasso, ordered
-by \code{sort(unique(group))}. Default is a vector of ones, indicating no
-weighting for any group.}
+by \code{sort(unique(group))}. Default is \code{sqrt(table(group))}, the
+standard group-lasso convention (Yuan & Lin 2006).}
 
 \item{intercept}{Centers mean function at 0 through \eqn{y - \bar{y}}.
 Default is \code{TRUE}.}
