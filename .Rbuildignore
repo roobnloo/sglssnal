@@ -10,6 +10,7 @@
 ^CLAUDE\.md$
 ^LICENSE\.md$
 ^README\.md$
+^cran-comments\.md$
 ^compile_flags.txt$
 ^.*\.Rproj$
 ^\.Rproj\.user$

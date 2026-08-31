@@ -41,12 +41,12 @@
 cv.sglssnal <- function(
   A, b, group, alpha = 0.05, lambda = NULL,
   nlambda = 100, lambda_min_ratio = 1e-4,
-  nfolds = 5, foldid = NULL, verbose = 0L,
+  nfolds = 5, foldid = NULL, verbose = 1L,
   stoptol = 1e-6, stoptolcv = 1e-4, ...
 ) {
   n <- length(b)
   p <- ncol(A)
-  stopifnot("verbose must be one of 0, 1, or 2" = verbose %in% c(0L, 1L, 2L))
+  stopifnot("verbose must be one of 0, 1, 2, or 3" = verbose %in% c(0L, 1L, 2L, 3L))
   stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
   stopifnot("length(alpha) must be 1" = length(alpha) == 1)
   stopifnot("alpha must be in [0, 1]" = alpha >= 0 & alpha <= 1)
@@ -61,9 +61,9 @@ cv.sglssnal <- function(
   }
 
   # Run sglssnal on the full dataset first to determine lambda path
-  if (verbose >= 1L) {
+  if (verbose >= 2L) {
     message("Fitting model on full dataset to determine lambda path...")
-  } else {
+  } else if (verbose == 1L) {
     message("Establishing lambda path on full dataset...")
   }
 
@@ -94,7 +94,7 @@ cv.sglssnal <- function(
     nfolds <- max(foldid)
   }
 
-  if (verbose >= 1L) {
+  if (verbose >= 2L) {
     message(sprintf(
       "Cross-validating sglssnal over %d lambda values with %d folds...",
       nlambda, nfolds
@@ -116,7 +116,7 @@ cv.sglssnal <- function(
     z0 <- rep(0, p)
     x0 <- rep(0, p)
 
-    if (verbose == 0L) {
+    if (verbose == 1L) {
       message(sprintf("Fold %d of %d...", t, nfolds))
     }
 
@@ -132,7 +132,7 @@ cv.sglssnal <- function(
       cv_err[i] <- cv_err[i] + sum(error^2)
     }
 
-    if (verbose >= 1L) {
+    if (verbose >= 2L) {
       message(
         sprintf(
           "Fold %d - %3.2fs", t,
@@ -141,7 +141,7 @@ cv.sglssnal <- function(
       )
     }
   }
-  if (verbose >= 1L) {
+  if (verbose >= 2L) {
     message(
       sprintf(
         "Total time: %3.2fs",
@@ -151,7 +151,7 @@ cv.sglssnal <- function(
   }
 
   min_lambda_id <- which.min(cv_err)
-  if (verbose >= 1L) {
+  if (verbose >= 2L) {
     message(sprintf(
       "Minimum error at lambda index %d (lambda = %g)",
       min_lambda_id, lambdas[min_lambda_id]

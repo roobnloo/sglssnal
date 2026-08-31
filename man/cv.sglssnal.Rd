@@ -14,7 +14,7 @@ cv.sglssnal(
   lambda_min_ratio = 1e-04,
   nfolds = 5,
   foldid = NULL,
-  verbose = 0L,
+  verbose = 1L,
   stoptol = 1e-06,
   stoptolcv = 1e-04,
   ...
@@ -47,11 +47,11 @@ Ignored if \code{foldid} is provided.}
 \item{foldid}{Vector of integers specifying the fold for each observation.
 If \code{NULL}, a default assignment is used.}
 
-\item{verbose}{How much to print to the console: \code{0} (default) shows a
-compact text progress bar tracking the lambda path; \code{1} prints full
-per-lambda SSNAL diagnostics (objective, feasibility, iteration counts,
-...) instead of the progress bar; \code{2} additionally prints the inner
-semismooth-Newton subproblem's iteration trace.}
+\item{verbose}{How much to print to the console: \code{0} is silent; \code{1}
+(default) shows a compact text progress bar tracking the lambda path;
+\code{2} prints full per-lambda SSNAL diagnostics (objective, feasibility,
+iteration counts, ...) instead of the progress bar; \code{3} additionally
+prints the inner semismooth-Newton subproblem's iteration trace.}
 
 \item{stoptol}{Tolerance for stopping criteria. Default is \code{1e-6}.}
 

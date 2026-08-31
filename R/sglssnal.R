@@ -41,11 +41,11 @@
 #' @param stopopt Stopping criteria. 1: relative duality gap and feasibility,
 #'   2: KKT conditions, 3: dual feasibility and relative duality gap,
 #'   4: dual feasibility and absolute duality gap. Default is `2L`.
-#' @param verbose How much to print to the console: `0` (default) shows a
-#'   compact text progress bar tracking the lambda path; `1` prints full
-#'   per-lambda SSNAL diagnostics (objective, feasibility, iteration counts,
-#'   ...) instead of the progress bar; `2` additionally prints the inner
-#'   semismooth-Newton subproblem's iteration trace.
+#' @param verbose How much to print to the console: `0` is silent; `1`
+#'   (default) shows a compact text progress bar tracking the lambda path;
+#'   `2` prints full per-lambda SSNAL diagnostics (objective, feasibility,
+#'   iteration counts, ...) instead of the progress bar; `3` additionally
+#'   prints the inner semismooth-Newton subproblem's iteration trace.
 #' @param maxit Maximum number of iterations. Default is `5000L`.
 #' @param Lip Lipschitz constant for the step size.
 #'   Automatically computed as the maximum eigenvalue of AA' if `NULL`.
@@ -84,14 +84,14 @@ sglssnal <- function(
   nlambda = 100, lambda_min_ratio = 1e-4, alpha = 0.05,
   pfgroup = sqrt(as.numeric(table(group))), intercept = TRUE,
   standardize = TRUE, stoptol = 1e-6, stopopt = 2L,
-  verbose = 0L, maxit = 5000L, Lip = NULL,
+  verbose = 1L, maxit = 5000L, Lip = NULL,
   y0 = NULL, z0 = NULL, x0 = NULL
 ) {
   # Validate inputs before crossprod(A, b) below, which errors
   # uninformatively on a shape mismatch.
   stopifnot("length(alpha) must be 1" = length(alpha) == 1)
   stopifnot("alpha must be in [0, 1]" = alpha >= 0 & alpha <= 1)
-  stopifnot("verbose must be one of 0, 1, or 2" = verbose %in% c(0L, 1L, 2L))
+  stopifnot("verbose must be one of 0, 1, 2, or 3" = verbose %in% c(0L, 1L, 2L, 3L))
   stopifnot("nrow(A) must be equal to length(b)" = nrow(A) == length(b))
   stopifnot("A must have at least one row and one column" = nrow(A) > 0 && ncol(A) > 0)
   stopifnot(
@@ -167,7 +167,7 @@ sglssnal <- function(
     tstartLip <- Sys.time()
     Lip <- compute_lip(A)
 
-    if (verbose >= 1L) {
+    if (verbose >= 2L) {
       message(sprintf(
         "\n Lip = %3.2e, time = %3.2f",
         Lip, as.numeric(difftime(Sys.time(), tstartLip, units = "secs"))
@@ -198,8 +198,8 @@ sglssnal <- function(
     Lip = Lip,
     maxit = maxit,
     stopopt = stopopt,
-    printmain = verbose >= 1L,
-    printsub = verbose >= 2L,
+    printmain = verbose >= 2L,
+    printsub = verbose >= 3L,
     p = p,
     n = n
   )
@@ -214,7 +214,7 @@ sglssnal <- function(
   )
 
   pb <- NULL
-  if (verbose == 0L) {
+  if (verbose == 1L) {
     message(sprintf(
       "Fitting %d lambda value%s...", nlambda, if (nlambda != 1) "s" else ""
     ))
@@ -224,7 +224,7 @@ sglssnal <- function(
 
   # Loop through lambda values
   for (i in 1:nlambda) {
-    if (verbose >= 1L) {
+    if (verbose >= 2L) {
       message(sprintf("\nFitting model for lambda = %g (%d/%d)", lambda[i], i, nlambda))
     }
 
@@ -292,7 +292,7 @@ sglssnal <- function(
       mse = mean((as.numeric(b - A %*% x))^2)
     )
 
-    if (verbose >= 1L) {
+    if (verbose >= 2L) {
       message("\n****************************************")
       message(sprintf(" SSNAL       : %s", msg))
       message(sprintf(" iteration   : %d", iter))
@@ -304,7 +304,7 @@ sglssnal <- function(
       message(sprintf(" dualfeas    : %3.2e", dualfeas))
       message(sprintf(" eta         : %3.2e", info_main$eta))
       message(sprintf(" nnz         : %d", runhist_main$nnz))
-    } else {
+    } else if (!is.null(pb)) {
       utils::setTxtProgressBar(pb, i)
     }
   }
