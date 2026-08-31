@@ -18,22 +18,6 @@ knitr::opts_chunk$set(
 library(sglssnal)
 ```
 
-```{r, include = FALSE}
-# The default verbose = 0 progress bar is drawn with cat(), not message(),
-# so suppressMessages() alone doesn't hide it. Redirect stdout too, for
-# cleaner vignette output.
-quiet_fit <- function(expr) {
-  depth <- sink.number()
-  con <- textConnection("quiet_fit_out", "w", local = TRUE)
-  sink(con)
-  on.exit({
-    while (sink.number() > depth) sink()
-    close(con)
-  })
-  suppressMessages(expr)
-}
-```
-
 ## What this package solves
 
 `sglssnal` fits the sparse-group lasso
@@ -63,7 +47,7 @@ bstar <- c(2, -3, rep(0, p - 2)) # only the first group is truly active
 b <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
 group <- rep(1:4, each = 5) # 4 groups of 5 columns each
 
-fit <- quiet_fit(sglssnal(A, b, group, lambda = 0.3, alpha = 0.5))
+fit <- sglssnal(A, b, group, lambda = 0.3, alpha = 0.5, verbose = 0)
 coef(fit)
 ```
 
@@ -79,7 +63,7 @@ fits a full descending path with `nlambda` values, auto-generated down to
 start for the next, smaller `lambda`:
 
 ```{r}
-fit_path <- quiet_fit(sglssnal(A, b, group, nlambda = 10, alpha = 0.5))
+fit_path <- sglssnal(A, b, group, nlambda = 10, alpha = 0.5, verbose = 0)
 dim(coef(fit_path)) # one column per lambda
 fit_path$lambda
 ```
@@ -94,7 +78,7 @@ penalty), matching Simon et al. (2013)'s own real-data examples and the
 cross-validated prediction error:
 
 ```{r}
-cvfit <- quiet_fit(cv.sglssnal(A, b, group, nlambda = 10, alpha = 0.5, nfolds = 5))
+cvfit <- cv.sglssnal(A, b, group, nlambda = 10, alpha = 0.5, nfolds = 5, verbose = 0)
 cvfit$cv_info$cv_lambda_id
 coef(cvfit)[, cvfit$cv_info$cv_lambda_id]
 ```
@@ -134,9 +118,9 @@ length(unique(riboflavin$group))
 gene here was assigned to its most-frequently annotated term.
 
 ```{r}
-cv_ribo <- quiet_fit(cv.sglssnal(riboflavin$A, riboflavin$b, riboflavin$group,
-  nlambda = 20, lambda_min_ratio = 1e-3, alpha = 0.75, nfolds = 5
-))
+cv_ribo <- cv.sglssnal(riboflavin$A, riboflavin$b, riboflavin$group,
+  nlambda = 20, lambda_min_ratio = 1e-3, alpha = 0.75, nfolds = 5, verbose = 0
+)
 best <- cv_ribo$cv_info$cv_lambda_id
 cv_ribo$cv_info$lambda[best]
 ```

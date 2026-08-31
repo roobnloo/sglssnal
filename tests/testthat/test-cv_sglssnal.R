@@ -82,7 +82,7 @@ test_that("invalid arguments are rejected with informative errors", {
   b <- rnorm(n)
   group <- rep(1:2, each = 5)
 
-  expect_error(cv.sglssnal(A, b, group, verbose = 9L), "verbose must be one of 0, 1, or 2")
+  expect_error(cv.sglssnal(A, b, group, verbose = 9L), "verbose must be one of 0, 1, 2, or 3")
   expect_error(cv.sglssnal(A, b, group, alpha = 1.5), "alpha must be in \\[0, 1\\]")
   expect_error(cv.sglssnal(A, b, group, alpha = c(0.1, 0.2)), "length\\(alpha\\) must be 1")
   expect_error(
