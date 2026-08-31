@@ -171,7 +171,4 @@ carbon metabolism (`GO:0005975`, `GO:1901135`), amino acid metabolism
 transport (`GO:0055085`), and machinery for growth and division
 (`GO:0006281` DNA repair, `GO:0007059` chromosome segregation,
 `GO:0042254` ribosome biogenesis) and nitrogen assimilation
-(`GO:0071941`). That's a fuller picture than the core pathway alone:
-sustaining overproduction takes not just the biosynthesis genes
-themselves, but the surrounding energy, precursor, transport, and growth
-machinery around them.
+(`GO:0071941`).

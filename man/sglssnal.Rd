@@ -37,8 +37,7 @@ groups are formed from \code{sort(unique(group))}.}
 
 \item{lambda}{Vector of penalty parameters or a single value. If \code{NULL}, a
 path is automatically generated from the largest lambda at which the
-all-zero solution is optimal (computed on the centered/standardized \code{A}
-and \code{b}, matching \code{intercept}/\code{standardize}) down to that value times
+all-zero solution is optimal down to that value times
 \code{lambda_min_ratio}. The path is fit using warm starts from larger to
 smaller lambda values.}
 
@@ -51,16 +50,8 @@ Default is 1e-4.}
 group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}. Default is \code{0.05}.}
 
 \item{pfgroup}{Penalty factor for each group in the group lasso, ordered
-by \code{sort(unique(group))}. Default is \code{sqrt(table(group))}: without a
-size correction, a larger group's ℓ2 norm is mechanically bigger just
-from summing more coordinates, so it clears the group threshold more
-easily regardless of signal strength. This is the standard group-lasso
-convention (Yuan & Lin 2006) and matches the \code{sparsegl} package's
-\code{pf_group} default. Only matters for relative group competition when
-sizes actually differ; for equal-sized groups every entry is the same
-constant, so which group wins is unaffected, though the constant still
-rescales the group penalty's absolute strength relative to the
-\eqn{\ell_1} term (it isn't bit-identical to a vector of ones).}
+by \code{sort(unique(group))}. Default is \code{sqrt(table(group))}, the
+standard group-lasso convention (Yuan & Lin 2006).}
 
 \item{intercept}{Centers mean function at 0 through \eqn{y - \bar{y}}.
 Default is \code{TRUE}.}
