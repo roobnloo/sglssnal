@@ -23,10 +23,11 @@ library(sglssnal)
 # so suppressMessages() alone doesn't hide it. Redirect stdout too, for
 # cleaner vignette output.
 quiet_fit <- function(expr) {
+  depth <- sink.number()
   con <- textConnection("quiet_fit_out", "w", local = TRUE)
   sink(con)
   on.exit({
-    sink()
+    while (sink.number() > depth) sink()
     close(con)
   })
   suppressMessages(expr)
