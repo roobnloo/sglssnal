@@ -119,18 +119,19 @@ variants, each profiled for the expression of 4088 genes, with the
 production yield (log-transformed) as the outcome. See `?riboflavin` for the
 full source.
 
-932 of those genes have a curated KEGG pathway annotation and are included
-here, grouped into 94 pathways (sizes ranging from 73 genes down to
-singletons):
+1199 of those genes have a Biological Process annotation mapping to a term
+in the "generic GO Slim" (a curated, coarse-grained subset of the Gene
+Ontology; CC BY 4.0) and are included here, grouped into 36 terms (sizes
+ranging from 284 genes down to singletons):
 
 ```{r}
 dim(riboflavin$A)
 length(unique(riboflavin$group))
 ```
 
-About two-thirds of these 932 genes actually belong to *more than one* KEGG pathway (up to 17 for a
-few). `sglssnal`'s `group` argument requires a strict partition, so each
-gene here was assigned to only its first-listed pathway.
+13% of these 1199 genes have annotations spanning more than one Slim term.
+`sglssnal`'s `group` argument requires a strict partition, so each such
+gene here was assigned to its most-frequently annotated term.
 
 ```{r}
 cv_ribo <- quiet_fit(cv.sglssnal(riboflavin$A, riboflavin$b, riboflavin$group,
@@ -151,22 +152,22 @@ plot(cv_ribo$cv_info$lambda, cv_ribo$cv_info$cvm,
 abline(v = cv_ribo$cv_info$lambda[best], lty = 2, col = "red")
 ```
 
-At that optimum, only a handful of the 94 pathways survive, most of them sparse:
+At that optimum, only a handful of the 36 terms survive, most of them sparse:
 
 ```{r}
 beta <- coef(cv_ribo)[-1, best] # drop the intercept row
 active <- unique(riboflavin$group[beta != 0])
-length(active) # of 94
-sum(beta != 0) # of 932
-table(riboflavin$group[beta != 0]) # nonzero genes per active pathway
+length(active) # of 36
+sum(beta != 0) # of 1199
+table(riboflavin$group[beta != 0]) # nonzero genes per active term
 ```
 
-The selected pathways include purine metabolism (`bsu00230`; GTP is
-riboflavin's direct biosynthetic precursor), energy supply (`bsu00010`
-Glycolysis, `bsu00190` Oxidative phosphorylation), translation capacity
-(`bsu03010` Ribosome, needed to build the biosynthetic enzymes themselves),
-transport (`bsu02010` ABC transporters), and regulation (`bsu02020`
-Two-component systems).
+The selected terms include nucleobase-containing small molecule metabolism
+(`GO:0055086`; GTP is riboflavin's direct biosynthetic precursor),
+carbohydrate and carbohydrate-derivative metabolism (`GO:0005975`,
+`GO:1901135`; energy supply), amino acid metabolism (`GO:0006520`),
+transmembrane transport (`GO:0055085`), and regulation of transcription
+(`GO:0006355`).
 
-Interestingly, `bsu00740` (Riboflavin metabolism -- the biosynthesis pathway
-itself) is not among the selected pathways.
+Interestingly, `GO:0006766` (vitamin metabolic process -- the biosynthesis
+pathway itself) is not among the selected terms.
