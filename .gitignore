@@ -55,3 +55,4 @@ compile_flags.txt
 context/
 .claude/skills/
 .claude/settings.local.json
+inst/doc

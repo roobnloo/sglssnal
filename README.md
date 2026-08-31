@@ -4,10 +4,10 @@
 
 This R package solves the sparse-group lasso problem using second-order information via the Semismooth Newton Augmented Lagrangian method from [Zhang et al. (2020)](https://link.springer.com/article/10.1007/s10107-018-1329-6).
 
-For a vector $x$ partitioned into $g$ non-overlapping groups and nonnegative weights $\{w_i\}$, define the penalty function
+For a vector $x$ partitioned into $g$ non-overlapping groups, nonnegative weights $\{w_i\}$, and mixing parameter $\alpha \in [0, 1]$, define the penalty function
 
 ```math
-\Phi(x) = \lambda_1\lVert x \rVert_1 + \lambda_2\sum_{i=1}^g w_i \lVert x_{(i)} \rVert_2.
+\Phi(x) = \alpha\lambda\lVert x \rVert_1 + (1-\alpha)\lambda\sum_{i=1}^g w_i \lVert x_{(i)} \rVert_2.
 ```
 The sparse-group lasso problem has the form
 ```math

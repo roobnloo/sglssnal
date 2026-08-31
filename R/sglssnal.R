@@ -2,12 +2,16 @@
 #' @description Fits a sparse-group lasso model using
 #'   second-order information to solve the dual problem.
 #'   The penalty function is given by
-#'   \deqn{\Phi(x) = \lambda_1 ||x||_1 + \lambda_2 \sum_{i=1}^g w_i ||x_{G_i}||_2}
-#'   where \eqn{G_i} is the \eqn{i}-th group and \eqn{w_i} its penalty factor.
+#'   \deqn{\Phi(x) = \alpha\lambda ||x||_1 + (1-\alpha)\lambda \sum_{i=1}^g w_i ||x_{G_i}||_2}
+#'   where \eqn{G_i} is the \eqn{i}-th group, \eqn{w_i} its penalty factor,
+#'   and \eqn{\alpha \in [0, 1]} mixes the \eqn{\ell_1} and group \eqn{\ell_2} penalties.
 #'   The primal problem is given by
 #'   \deqn{\min_{x \in \mathbb{R}^p}\; \frac{1}{2} ||Ax - b||_2^2 + \Phi(x)}
 #'   while the dual problem has the form
-#'   \deqn{\max_{y \in \mathbb{R}^n, z \in \mathbb{R}^p}\; -\langle b, y\rangle - \frac{1}{2}||y||_2^2 - \Phi^\ast(z) \text{s.t.} A^\top y + z = 0}
+#'   \deqn{\begin{matrix}
+#'   \max_{y \in \mathbb{R}^n, z \in \mathbb{R}^p}\; -\langle b, y\rangle - \frac{1}{2}||y||_2^2 - \Phi^\ast(z) \\
+#'   \text{s.t.}\; A^\top y + z = 0
+#'   \end{matrix}}
 #'   where \eqn{\Phi^\ast(z)} denotes the Fenchel conjugate of \eqn{\Phi}.
 #'   The algorithm is based on the work of Zhang et al. (2020).
 #' @param A \eqn{n \times p} design matrix.
@@ -23,7 +27,7 @@
 #'   `lambda_min_ratio`. The path is fit using warm starts from larger to
 #'   smaller lambda values.
 #' @param alpha Determines the relative weight of the \eqn{\ell_1} and
-#'   group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}.
+#'   group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}. Default is `0.05`.
 #' @param nlambda Number of lambda values to use when `lambda` is `NULL`. Default is 100.
 #' @param lambda_min_ratio Minimum ratio of the smallest to largest lambda when `lambda` is `NULL`.
 #'   Default is 1e-4.

@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 augmented Lagrangian) sparse-group-lasso solver from Zhang, Zhang, Sun & Toh
 (2020), *Mathematical Programming* 179:223-263 — ported from the MATLAB
 reference at https://github.com/YangjingZhang/SparseGroupLasso. It solves
-\(\min_x \tfrac12\|Ax-b\|_2^2 + \lambda_1\|x\|_1 + \lambda_2\sum_i w_i\|x_{G_i}\|_2\)
+\(\min_x \tfrac12\|Ax-b\|_2^2 + \alpha\lambda\|x\|_1 + (1-\alpha)\lambda\sum_i w_i\|x_{G_i}\|_2\)
 by applying a second-order (semismooth Newton) method to the *dual* problem,
 rather than first-order descent on the primal — that's the paper's whole
 point and the reason the C++ core looks the way it does. Working toward a
