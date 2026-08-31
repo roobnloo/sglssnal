@@ -1,3 +1,3 @@
-# sglssnal (development version)
+# sglssnal 0.1.0
 
 * Initial CRAN submission.
