@@ -22,7 +22,7 @@ test_that("run with custom lambda", {
   expect_equal(result$cv_info$lambda, lambda)
   expect_equal(result$cv_info$alpha, 0.5)
   expect_equal(length(result$cv_info$cvm), length(lambda))
-  expect_equal(result$cv_info$cv_lambda_id, 7)
+  expect_equal(result$cv_info$cv_lambda_id, 8)
 })
 
 test_that("run with default lambda", {

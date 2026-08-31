@@ -12,7 +12,7 @@ sglssnal(
   nlambda = 100,
   lambda_min_ratio = 1e-04,
   alpha = 0.05,
-  pfgroup = rep(1, length(unique(group))),
+  pfgroup = sqrt(as.numeric(table(group))),
   intercept = TRUE,
   standardize = TRUE,
   stoptol = 1e-06,
@@ -51,8 +51,16 @@ Default is 1e-4.}
 group \eqn{\ell_2} penalty. Must be in \eqn{[0, 1]}. Default is \code{0.05}.}
 
 \item{pfgroup}{Penalty factor for each group in the group lasso, ordered
-by \code{sort(unique(group))}. Default is a vector of ones, indicating no
-weighting for any group.}
+by \code{sort(unique(group))}. Default is \code{sqrt(table(group))}: without a
+size correction, a larger group's ℓ2 norm is mechanically bigger just
+from summing more coordinates, so it clears the group threshold more
+easily regardless of signal strength. This is the standard group-lasso
+convention (Yuan & Lin 2006) and matches the \code{sparsegl} package's
+\code{pf_group} default. Only matters for relative group competition when
+sizes actually differ; for equal-sized groups every entry is the same
+constant, so which group wins is unaffected, though the constant still
+rescales the group penalty's absolute strength relative to the
+\eqn{\ell_1} term (it isn't bit-identical to a vector of ones).}
 
 \item{intercept}{Centers mean function at 0 through \eqn{y - \bar{y}}.
 Default is \code{TRUE}.}

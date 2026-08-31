@@ -13,11 +13,11 @@ test_that("simple run of sglssnal", {
     alpha = 0.5, intercept = FALSE, standardize = FALSE
   )
   obj <- round(result$obj, 3)
-  expect_obj <- matrix(c(19.358, 19.358), nrow = 2)
+  expect_obj <- matrix(c(33.023, 33.023), nrow = 2)
   rownames(expect_obj) <- c("primal objective", "dual objective")
   expect_equal(obj, expect_obj)
-  expect_equal(result$info[[1]]$iter, 10)
-  expect_equal(result$info[[1]]$nnz, 50)
+  expect_equal(result$info[[1]]$iter, 8)
+  expect_equal(result$info[[1]]$nnz, 20)
 })
 
 test_that("sparse and dense run", {
@@ -218,6 +218,24 @@ test_that("pfgroup weights shrink a more heavily penalized group harder", {
   expect_equal(norm1_equal, norm2_equal, tolerance = 0.05)
   expect_lt(norm2_weighted, norm2_equal)
   expect_gt(norm1_weighted, norm2_weighted)
+})
+
+test_that("pfgroup defaults to sqrt(group size)", {
+  set.seed(11)
+  n <- 60
+  p <- 15
+
+  A <- matrix(rnorm(n * p), n, p)
+  bstar <- rep(1, p)
+  b <- as.numeric(A %*% bstar + rnorm(n, sd = 0.1))
+  group <- rep(1:3, times = c(3, 5, 7)) # deliberately unequal sizes
+
+  fit_default <- sglssnal(A, b, group, lambda = 1, alpha = 0.5)
+  fit_explicit <- sglssnal(A, b, group,
+    lambda = 1, alpha = 0.5, pfgroup = sqrt(as.numeric(table(group)))
+  )
+
+  expect_equal(fit_default$x, fit_explicit$x)
 })
 
 test_that("alpha = 1 (pure lasso) matches the closed-form soft-threshold solution", {

@@ -32,8 +32,16 @@
 #' @param lambda_min_ratio Minimum ratio of the smallest to largest lambda when `lambda` is `NULL`.
 #'   Default is 1e-4.
 #' @param pfgroup Penalty factor for each group in the group lasso, ordered
-#'   by `sort(unique(group))`. Default is a vector of ones, indicating no
-#'   weighting for any group.
+#'   by `sort(unique(group))`. Default is `sqrt(table(group))`: without a
+#'   size correction, a larger group's ℓ2 norm is mechanically bigger just
+#'   from summing more coordinates, so it clears the group threshold more
+#'   easily regardless of signal strength. This is the standard group-lasso
+#'   convention (Yuan & Lin 2006) and matches the `sparsegl` package's
+#'   `pf_group` default. Only matters for relative group competition when
+#'   sizes actually differ; for equal-sized groups every entry is the same
+#'   constant, so which group wins is unaffected, though the constant still
+#'   rescales the group penalty's absolute strength relative to the
+#'   \eqn{\ell_1} term (it isn't bit-identical to a vector of ones).
 #' @param standardize Whether to standardize the columns of A to have unit norm.
 #'   Default is `TRUE`.
 #' @param intercept Centers mean function at 0 through \eqn{y - \bar{y}}.
@@ -83,7 +91,7 @@
 sglssnal <- function(
     A, b, group, lambda = NULL,
     nlambda = 100, lambda_min_ratio = 1e-4, alpha = 0.05,
-    pfgroup = rep(1, length(unique(group))), intercept = TRUE,
+    pfgroup = sqrt(as.numeric(table(group))), intercept = TRUE,
     standardize = TRUE, stoptol = 1e-6, stopopt = 2L,
     verbose = 0L, maxit = 5000L, Lip = NULL,
     y0 = NULL, z0 = NULL, x0 = NULL) {
