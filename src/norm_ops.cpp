@@ -16,7 +16,7 @@ arma::vec proximal_l2(const arma::vec &z, double lam, const GroupStruct &gs) {
 
   arma::vec result = z;
 
-  for (uint i = 0; i < gs.num_group; ++i) {
+  for (uword i = 0; i < gs.num_group; ++i) {
     int kstart = gs.ind(0, i);
     int kend = gs.ind(1, i);
     double w = lam * gs.ind(2, i);
@@ -44,7 +44,7 @@ arma::vec projection_l2(const arma::vec &z, double lam, const GroupStruct &gs,
 
   arma::vec Pz(size(z));
 
-  for (uint i = 0; i < gs.num_group; ++i) {
+  for (uword i = 0; i < gs.num_group; ++i) {
     int kstart = gs.ind(0, i);
     int kend = gs.ind(1, i);
     double w = lam * gs.ind(2, i);
@@ -76,7 +76,7 @@ arma::vec proximal_combo(const arma::vec &v, double lam1, double lam2,
 
 double group_l2_norm(const arma::vec &z, const GroupStruct &gs) {
   double sum_norms = 0;
-  for (uint i = 0; i < gs.num_group; ++i) {
+  for (uword i = 0; i < gs.num_group; ++i) {
     sum_norms += gs.ind(2, i) * norm(z.subvec(gs.ind(0, i), gs.ind(1, i)), 2);
   }
 

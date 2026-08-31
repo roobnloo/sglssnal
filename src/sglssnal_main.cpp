@@ -311,7 +311,7 @@ List sglssnal_main_interface(const arma::sp_mat &A, const arma::vec &b,
                              bool intercept) {
   uvec G = as<uvec>(gs_list["G"]);
   mat ind = as<mat>(gs_list["ind"]);
-  uint num_group = ind.n_cols;
+  uword num_group = ind.n_cols;
   GroupStruct gs = {as<sp_mat>(gs_list["pma"]), G, ind, num_group};
 
   return sglssnal_main(A, b, lam1, lam2, gs, parmain, y0, z0, x0, intercept);
@@ -325,7 +325,7 @@ List sglssnal_main_interface_dense(const arma::mat &A, const arma::vec &b,
                                    const arma::vec &x0, bool intercept) {
   uvec G = as<uvec>(gs_list["G"]);
   mat ind = as<mat>(gs_list["ind"]);
-  uint num_group = ind.n_cols;
+  uword num_group = ind.n_cols;
   GroupStruct gs = {as<sp_mat>(gs_list["pma"]), G, ind, num_group};
 
   return sglssnal_main(A, b, lam1, lam2, gs, parmain, y0, z0, x0, intercept);
