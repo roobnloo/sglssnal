@@ -25,7 +25,7 @@ void mat_ssn(const arma::vec &u, const MatType &A, double lam1, double lam2,
   V = zeros(n, n);
   vec DD = zeros(nvars);
 
-  for (uint k = 0; k < gs.num_group; k++) {
+  for (uword k = 0; k < gs.num_group; k++) {
     if (grp_norms(k) <= datum::eps) {
       continue;
     }
@@ -59,7 +59,7 @@ void mat_ssn(const arma::vec &u, const MatType &A, double lam1, double lam2,
 template <typename MatType>
 bool build_woodbury_D(const arma::vec &u, const MatType &A, double lam1,
                        double lam2, const GroupStruct &gs, double sig,
-                       sp_mat &D, uint &sp_dim) {
+                       sp_mat &D, uword &sp_dim) {
   vec prox1u = proximal_l1(u, lam1);
   vec pv = gs.pma * prox1u;
   int n = A.n_rows;
@@ -73,8 +73,8 @@ bool build_woodbury_D(const arma::vec &u, const MatType &A, double lam1,
   uvec nz_grp_ids = find(grp_norms);
   sp_mat B(n, nz_prox1u_ids.n_elem + nz_grp_ids.n_elem);
   sp_mat C(n, nz_grp_ids.n_elem);
-  uint s_start = 0;
-  uint i = 0;
+  uword s_start = 0;
+  uword i = 0;
   for (int k : nz_grp_ids) {
     vec vk = gs.get_group_subview(prox1u, k);
     uvec indvk = find(vk);
@@ -87,8 +87,8 @@ bool build_woodbury_D(const arma::vec &u, const MatType &A, double lam1,
     Al = Al.cols(indvk);
 
     MatType Bl = sqrt(sig - par1) * Al;
-    uint lenind1 = Bl.n_cols;
-    uint s_end = s_start + lenind1 - 1;
+    uword lenind1 = Bl.n_cols;
+    uword s_end = s_start + lenind1 - 1;
     B.cols(s_start, s_end) = Bl;
     s_start = s_end + 1;
 
@@ -110,7 +110,7 @@ bool build_woodbury_D(const arma::vec &u, const MatType &A, double lam1,
 template <typename MatType>
 bool mat2_ssn(const arma::vec &u, const MatType &A, double lam1, double lam2,
               const GroupStruct &gs, double sig, arma::mat &V2, sp_mat &D,
-              uint &sp_dim) {
+              uword &sp_dim) {
   if (!build_woodbury_D(u, A, lam1, lam2, gs, sig, D, sp_dim)) {
     return false;
   }
@@ -162,7 +162,7 @@ List conjgrad_linsolver(const MatType &A, const arma::vec &rhs,
   if (solver == 2) {
     arma::mat V2;
     arma::sp_mat D;
-    uint sp_dim;
+    uword sp_dim;
     if (mat2_ssn(u, A, lam1, lam2, gs, sig, V2, D, sp_dim)) {
       arma::vec rhstmp = D.t() * rhs;
       dy = solve(V2, rhstmp, solve_opts::likely_sympd);
@@ -176,7 +176,7 @@ List conjgrad_linsolver(const MatType &A, const arma::vec &rhs,
 
   if (solver == 3) {
     arma::sp_mat D;
-    uint sp_dim;
+    uword sp_dim;
     if (!build_woodbury_D(u, A, lam1, lam2, gs, sig, D, sp_dim)) {
       dy = rhs;
       solve_ok = 1;
@@ -222,7 +222,7 @@ List conjgrad_linsolver_interface(const arma::sp_mat &A, const arma::vec &rhs,
                                   int density, double sig, List par) {
   uvec G = as<uvec>(gs_list["G"]);
   mat ind = as<mat>(gs_list["ind"]);
-  uint num_group = ind.n_cols;
+  uword num_group = ind.n_cols;
   GroupStruct gs = {as<sp_mat>(gs_list["pma"]), G, ind, num_group};
   return conjgrad_linsolver(A, rhs, u, lam1, lam2, gs, density, sig, par);
 }
@@ -235,7 +235,7 @@ List conjgrad_linsolver_interface_dense(const arma::mat &A,
                                         int density, double sig, List par) {
   uvec G = as<uvec>(gs_list["G"]);
   mat ind = as<mat>(gs_list["ind"]);
-  uint num_group = ind.n_cols;
+  uword num_group = ind.n_cols;
   GroupStruct gs = {as<sp_mat>(gs_list["pma"]), G, ind, num_group};
   return conjgrad_linsolver(A, rhs, u, lam1, lam2, gs, density, sig, par);
 }
