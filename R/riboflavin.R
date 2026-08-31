@@ -29,7 +29,7 @@
 #'   annotations: UniProt-GOA *B. subtilis* 168 proteome annotation file,
 #'   \url{https://ftp.ebi.ac.uk/pub/databases/GO/goa/proteomes/}
 #'   (GO release 2026-07-26). GO Slim term set: `goslim_generic`,
-#'   \url{http://current.geneontology.org/ontology/subsets/goslim_generic.obo}.
+#'   \url{https://current.geneontology.org/ontology/subsets/goslim_generic.obo}.
 #'   Gene Ontology Consortium data and data products are licensed under
 #'   \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0}; see
 #'   \url{https://geneontology.org/docs/go-citation-policy/}.
