@@ -57,14 +57,6 @@ List findstep_impl(const arma::vec &b, double sig, double psi_y0,
     psi_y =
         -(dot(b, y) + 0.5 * sum(square(y)) + 0.5 * sig * sum(square(Prox_u)));
 
-    // if (printsub) {
-    //   Rcpp::Rcout << "\n --------------------------------------- " <<
-    //   std::endl; Rcpp::Rcout << " alp = " << alp << ", psi_y = " << psi_y
-    //               << ", psi_y0 = " << psi_y0 << std::endl;
-    //   Rcpp::Rcout << " --------------------------------------- " <<
-    //   std::endl;
-    // }
-
     if (iter == 0) {
       gLB = g0;
       gUB = galp;
